@@ -1,9 +1,8 @@
 import express from "express";
-// const express = require("express");
 const app = express();
 
 app.get("/api", (req, res) => {
-  res.json({ test: ["berto", "matthew", "indra"] });
+  res.json({ test: ["berto", "matthew", "indra", "hals"] });
 });
 
 app.listen(3000, () => {

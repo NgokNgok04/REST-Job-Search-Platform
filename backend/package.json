@@ -4,7 +4,8 @@
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "tsx ./src/index.ts"
+    "start": "tsc && node dist/index.js",
+    "dev": "tsx watch src/index.ts"
   },
   "author": "WBD",
   "license": "ISC",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.1",
+    "nodemon": "^3.1.7",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
