@@ -16,4 +16,6 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["node", "index.js"]
+RUN npx prisma generate
+
+CMD ["sh", "-c","npx prisma migrate deploy && npm start"]
