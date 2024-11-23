@@ -49,6 +49,7 @@ const RegisterPage = () => {
                 else{
                     const data = await response.json();
                     setError(data.message || "Something went wrong");
+                    console.log(data.user);
                 }
             } catch{
                 setError("Something went wrong");

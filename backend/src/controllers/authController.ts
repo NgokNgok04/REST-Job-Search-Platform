@@ -9,7 +9,7 @@ const users: {
     email: string;
     password: string;
     name: string;
-  }[] = [];
+}[] = [];
 
 
 //  thanks to stackoverflow
@@ -34,9 +34,6 @@ export const AuthController = {
         } else if (password !== confirmPassword) {
           res.status(400).json({ message: "Passwords do not match" });
           return;
-        } else if (users.find((user) => user.email === email)) {
-          res.status(400).json({ message: "Email already exists" });
-          return;
         } else if (!validateEmail(email)) {
           res.status(400).json({ message: "Invalid email" });
           return;   
@@ -49,10 +46,33 @@ export const AuthController = {
         }
 
         try {
+            // check email dalam db 
+            const isExistUser = await prisma.user.findUnique({
+                where:{
+                    email: email
+                }
+            });
+
+            if(isExistUser){
+                res.status(400).json({ message: "Email already exists" })
+                return;
+            };
             //TODO: hashPassword pake bcrypt dengan salt 10 disini
-            users.push({ username, email, password, name });
-            res.status(201).json({ message: "User created successfully"});
-            return;
+            
+            const newUser = await prisma.user.create({
+                data: {
+                    username: username,
+                    email: email,
+                    password_hash: password
+                }
+            });
+            if(newUser){
+                res.status(201).json({ message: "User created successfully"});
+                return;
+            }else{
+                res.status(500).json({ message: "User failed to create", data: newUser });
+                return;
+            }
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
             return;
