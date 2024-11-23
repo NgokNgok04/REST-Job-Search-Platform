@@ -11,6 +11,7 @@ const RegisterPage = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
+    const [isRegistered, setIsRegistered] = useState(false);
     const handleRegister = async () => {
         try{
             if(!username || !name || !email || !password || !confirmPassword){
@@ -39,11 +40,11 @@ const RegisterPage = () => {
                     body: JSON.stringify(userData),
                 })
 
-                console.log("masuk sini")
-    
                 if(response.ok){
                     const data = await response.json();
-                    console.log(data);
+                    setIsRegistered(true);
+                    console.log(data.message);
+                    console.log(data.user);
                 }
                 else{
                     const data = await response.json();
@@ -108,6 +109,7 @@ const RegisterPage = () => {
                 />
                 <button onClick={handleRegister}>Register</button>
                 {error && <p className="text-red-500 mt-2">{error}</p>}
+                {isRegistered && <Navigate to="/login" />}
             </div>
         </div>
     );
