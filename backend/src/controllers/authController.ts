@@ -45,6 +45,15 @@ export const AuthController = {
             return;
         }
 
+        const newUser = await prisma.user.create({
+            data: {
+                username: username,
+                email: email,
+                password_hash: password
+            }
+        });
+        res.status(201).json({ message: "User created successfully" });
+        return;
         try {
             // check email dalam db 
             const isExistUser = await prisma.user.findUnique({
