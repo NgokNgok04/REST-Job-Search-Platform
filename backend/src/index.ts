@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 // import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
-import bcrypt from "bcrypt";
+// import cookieParser from "cookie-parser";
+// import bcrypt from "bcrypt";
 // const bcrypt = require("bcrypt");
 
 const app = express();
@@ -35,8 +35,8 @@ app.post("/api/signup", async (req: Request, res: Response) => {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, email, password: hashedPassword, name });
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ username, email, password, name });
     res.status(201).json({ message: "User created successfully" });
     return;
   } catch (error) {
