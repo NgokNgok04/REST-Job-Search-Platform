@@ -4,14 +4,6 @@ import { resolve } from "path";
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
-//ini harusnya pake database
-const users: {
-    username: string;
-    email: string;
-    password: string;
-    name: string;
-}[] = [];
-
 
 //  thanks to stackoverflow
 const validateEmail = (email: string) => {
@@ -34,19 +26,19 @@ export const AuthController = {
     signup: async (req: any, res: any) => {
         const { username, email, name, password, confirmPassword } = req.body;
         if (!username || !email || !password || !name || !confirmPassword) {
-          res.status(400).json({ message: "All fields are required" });
+          res.status(400).json({ status: false, message: "All fields are required"});
           return;
         } else if (password !== confirmPassword) {
-          res.status(400).json({ message: "Passwords do not match" });
+          res.status(400).json({ status: false, message: "Passwords do not match" });
           return;
         } else if (!validateEmail(email)) {
-          res.status(400).json({ message: "Invalid email" });
+          res.status(400).json({ status: false, message: "Invalid email" });
           return;   
         } else if (password.length < 6){
-            res.status(400).json({ message: "Password must be at least 6 characters long" });
+            res.status(400).json({ status: false, message: "Password must be at least 6 characters long" });
             return;
         } else if (!passwordChecker(password)){
-            res.status(400).json({ message: "Password must contain one uppercase letter, one number, and one special character" });
+            res.status(400).json({ status: false, message: "Password must contain one uppercase letter, one number, and one special character" });
             return;
         }
 
@@ -59,7 +51,7 @@ export const AuthController = {
             });
 
             if(isExistUser){
-                res.status(400).json({ message: "Email already exists" })
+                res.status(400).json({ status: false, message: "Email already exists" })
                 return;
             };
             
@@ -73,19 +65,20 @@ export const AuthController = {
                     username: username,
                     email: email,
                     password_hash: hashed_password,
+                    full_name: name, 
                     created_at: currDatetime,
                     updated_at: currDatetime
                 }
             });
             if(newUser){
-                res.status(201).json({ message: "User created successfully"});
+                res.status(201).json({ status: true, message: "User created successfully"});
                 return;
             }else{
-                res.status(500).json({ message: "User failed to create"});
+                res.status(500).json({ status: false, message: "User failed to create"});
                 return;
             }
         } catch (error) {
-            res.status(500).json({ message: "Internal server error"});
+            res.status(500).json({ status: false, message: "Internal server error"});
             return;
         }
     },
@@ -93,7 +86,9 @@ export const AuthController = {
     signin: async (req: any, res: any) => {
         const { email, password } = req.body;
         if (!email || !password) {
-          res.status(400).json({ message: "All fields are required" });
+          res.status(400).json({ status: false, message: "All fields are required", body: {
+                token: null
+          }});
           return;
         }
 
@@ -105,19 +100,24 @@ export const AuthController = {
             })
 
             if(!user){
-                res.status(400).json({ message: "Email or Password is wrong" });
+                res.status(400).json({ status: false, message: "Email or Password is wrong", body: {
+                    token: null
+                }});
                 return;
             }
             const isPasswordvalid = bcrypt.compareSync(password, user.password_hash);
             if(!isPasswordvalid){
-                res.status(400).json({ message: "Email or Password is wrong" });
+                res.status(400).json({ status: false, message: "Email or Password is wrong", body:{
+                    token: null
+                }});
                 return;
             }
             
             const token = sign(
                 { id: user.id.toString, email: user.email, password: user.password_hash}, 
                 secret.key, 
-                { expiresIn: "1h" })
+                { expiresIn: "1h" }
+            )
             
             if(token){
                 res.cookie('token', token, {
@@ -126,17 +126,23 @@ export const AuthController = {
                     maxAge: 3600,
                 });
 
-                res.status(200).json({ message: "Login successful", token: token});
+                res.status(200).json({status: true, message: "Login successful", body:{
+                    token: token
+                }});
                 return;
             }
             else{
-                res.status(500).json({ message: "Can't login user at the moment" });
+                res.status(500).json({status: true, message: "Can't login user at the moment", body:{
+                    token: null
+                }});
                 return;
             }
         }
         catch (err){
             const errorMessage = err instanceof Error ? err.message : String(err);
-            res.status(500).json({ message: errorMessage });
+            res.status(500).json({status: true, message: errorMessage, body:{
+                token: null
+            }});
             return;
         }
 

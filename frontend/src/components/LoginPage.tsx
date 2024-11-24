@@ -27,9 +27,13 @@ const LoginPage = () => {
             if (!response.ok){
                 setError(data.message);
             } else {
-                setSuccess(true);
-                console.log(success);
-                localStorage.setItem("token", data.token);
+                if(data.body.status === false){
+                    setError(data.body.message);
+                }
+                else{
+                    setSuccess(true);
+                    localStorage.setItem("token", data.body.token);
+                }
             }
         } catch (err: any){
             setError(err);

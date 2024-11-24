@@ -1,10 +1,7 @@
 import express, { Request, Response } from "express";
 import { AuthController } from "./controllers/authController";
 import cors from 'cors';
-// import jwt from "jsonwebtoken";
-// import cookieParser from "cookie-parser";
-// import bcrypt from "bcrypt";
-// const bcrypt = require("bcrypt");
+
 
 const app = express();
 
@@ -19,7 +16,7 @@ app.get("/api", (req, res) => {
   res.json({ test: ["berto", "matthew", "indra", "hals"] });
 });
 
-app.post("/api/signup", AuthController.signup);
+app.post("/api/register", AuthController.signup);
 app.post("/api/login", AuthController.signin);
 
 app.listen(3000, () => {
