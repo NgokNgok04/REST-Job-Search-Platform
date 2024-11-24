@@ -44,7 +44,7 @@ export const AuthController = {
             res.status(400).json({ message: "Password must contain one uppercase letter, one number, and one special character" });
             return;
         }
-        
+
         try {
             // check email dalam db 
             const isExistUser = await prisma.user.findUnique({
@@ -57,6 +57,7 @@ export const AuthController = {
                 res.status(400).json({ message: "Email already exists" })
                 return;
             };
+            
             //TODO: hashPassword pake bcrypt dengan salt 10 disini
             
             const currDatetime = new Date();
@@ -73,11 +74,11 @@ export const AuthController = {
                 res.status(201).json({ message: "User created successfully"});
                 return;
             }else{
-                res.status(500).json({ message: "User failed to create", data: newUser });
+                res.status(500).json({ message: "User failed to create"});
                 return;
             }
         } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+            res.status(500).json({ message: "Internal server error"});
             return;
         }
     }
