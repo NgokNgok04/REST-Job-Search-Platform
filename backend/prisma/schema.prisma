@@ -14,27 +14,30 @@ datasource db {
 }
 
 model User {
-  id            BigInt       @id @default(autoincrement())
-  username      String       @unique
-  email         String       @unique
-  password_hash String
-  created_at    DateTime     @default(now())
-  updated_at    DateTime     @updatedAt
-  Feed          Feed[]
-  ChatFrom      Chat[]       @relation("ChatFrom")
-  ChatTo        Chat[]       @relation("ChatTo")
+  id                    BigInt              @id @default(autoincrement())
+  username              String              @unique
+  email                 String              @unique
+  password_hash         String
+  full_name             String?
+  work_history          String?
+  skills                String?
+  created_at            DateTime            @default(now()) @db.Timestamptz
+  updated_at            DateTime            @updatedAt @db.Timestamptz
+  Feed                  Feed[]
+  ChatFrom              Chat[]              @relation("ChatFrom")
+  ChatTo                Chat[]              @relation("ChatTo")
   ConnectionRequestFrom ConnectionRequest[] @relation("ConnectionRequestFrom")
   ConnectionRequestTo   ConnectionRequest[] @relation("ConnectionRequestTo")
-  ConnectionFrom Connection[] @relation("ConnectionFrom")
-  ConnectionTo   Connection[] @relation("ConnectionTo")
-  PushSubscription PushSubscription[]
+  ConnectionFrom        Connection[]        @relation("ConnectionFrom")
+  ConnectionTo          Connection[]        @relation("ConnectionTo")
+  PushSubscription      PushSubscription[]
 }
 
 model Feed {
   id         BigInt   @id @default(autoincrement())
   content    String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
   user_id    BigInt
   User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -42,15 +45,15 @@ model Feed {
 }
 
 model Chat {
-  id         BigInt   @id @default(autoincrement())
-  timestamp  DateTime @default(now())
-  from_id    BigInt
-  to_id      BigInt
-  message    String
-  From       User     @relation("ChatFrom", fields: [from_id], references: [id], onDelete: Cascade)
-  To         User     @relation("ChatTo", fields: [to_id], references: [id], onDelete: Cascade)
+  id        BigInt   @id @default(autoincrement())
+  timestamp DateTime @default(now()) @db.Timestamptz
+  from_id   BigInt
+  to_id     BigInt
+  message   String
+  From      User     @relation("ChatFrom", fields: [from_id], references: [id], onDelete: Cascade)
+  To        User     @relation("ChatTo", fields: [to_id], references: [id], onDelete: Cascade)
 
-  @@index([from_id,to_id])
+  @@index([from_id, to_id])
 }
 
 model ConnectionRequest {
@@ -59,6 +62,7 @@ model ConnectionRequest {
   created_at DateTime
   From       User     @relation("ConnectionRequestFrom", fields: [from_id], references: [id], onDelete: Cascade)
   To         User     @relation("ConnectionRequestTo", fields: [to_id], references: [id], onDelete: Cascade)
+
   @@id([from_id, to_id])
 }
 
@@ -68,14 +72,16 @@ model Connection {
   created_at DateTime
   From       User     @relation("ConnectionFrom", fields: [from_id], references: [id], onDelete: Cascade)
   To         User     @relation("ConnectionTo", fields: [to_id], references: [id], onDelete: Cascade)
+
   @@id([from_id, to_id])
 }
 
 model PushSubscription {
-  endpoint   String  @id
+  endpoint   String   @id
   user_id    BigInt?
   keys       Json
-  created_at DateTime @default(now())
-  User       User?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  created_at DateTime @default(now()) @db.Timestamptz
+  User       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
   @@index([user_id])
 }
