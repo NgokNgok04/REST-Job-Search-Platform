@@ -19,10 +19,7 @@ app.get("/api", (req, res) => {
 });
 
 app.post("/api/signup", AuthController.signup);
-
-app.get("/api/login", (req, res) => {
-  //TODO
-});
+app.post("/api/login", AuthController.signin);
 
 app.listen(3000, () => {
   console.log("Server listening on port 3000...");

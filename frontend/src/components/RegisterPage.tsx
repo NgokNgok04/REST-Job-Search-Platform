@@ -43,8 +43,8 @@ const RegisterPage = () => {
                 if(response.ok){
                     const data = await response.json();
                     setIsRegistered(true);
-                    console.log(data.message);
-                    console.log(data.user);
+                    // console.log(data.message);
+                    // console.log(data.user);
                 }
                 else{
                     const data = await response.json();

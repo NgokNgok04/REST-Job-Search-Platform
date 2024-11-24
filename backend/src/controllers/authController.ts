@@ -1,6 +1,7 @@
-import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
-// const bcrypt = require('bcrypt'); masih rusak astaga
+import { sign } from "jsonwebtoken";
+import { resolve } from "path";
+const bcrypt = require("bcrypt");
 
 const prisma = new PrismaClient();
 //ini harusnya pake database
@@ -23,6 +24,10 @@ const passwordChecker = (password: string) => {
     //buat password mengandung satu huruf besar, satu angka, dan satu karakter spesial
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])/;
     return passwordRegex.test(password);
+}
+
+const secret = {
+    key: "A_SECRET_TEMPLATE"
 }
 
 export const AuthController = {
@@ -59,7 +64,8 @@ export const AuthController = {
             };
             
             //TODO: hashPassword pake bcrypt dengan salt 10 disini
-            
+            // var salt = bcrypt.genSaltSync(10);
+
             const currDatetime = new Date();
             const newUser = await prisma.user.create({
                 data: {
@@ -81,5 +87,56 @@ export const AuthController = {
             res.status(500).json({ message: "Internal server error"});
             return;
         }
+    },
+
+    signin: async (req: any, res: any) => {
+        const { email, password } = req.body;
+        if (!email || !password) {
+          res.status(400).json({ message: "All fields are required" });
+          return;
+        }
+
+        try {
+            const user = await prisma.user.findUnique({
+                where:{
+                    email: email
+                }
+            })
+
+            if(!user){
+                res.status(400).json({ message: "Email or Password is wrong" });
+                return;
+            }
+
+            const isPasswordvalid = user.password_hash === password;
+            if(!isPasswordvalid){
+                res.status(400).json({ message: "Email or Password is wrong" });
+                return;
+            }
+            
+            const token = await new Promise((resolve, reject) => {
+                sign({ id: user.id.toString, email: user.email, password: user.password_hash}, secret.key, (err: any, token: any) => {
+                    if(err){
+                        reject(err);
+                    }
+                    resolve(token);
+                })
+            })
+
+            if(token){
+                res.status(200).json({ message: "Login successful", token: token });
+                return;
+            }
+            else{
+                res.status(500).json({ message: "Can't login user at the moment" });
+                return;
+            }
+        }
+        catch (err){
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            res.status(500).json({ message: errorMessage });
+            return;
+        }
+
     }
 }
