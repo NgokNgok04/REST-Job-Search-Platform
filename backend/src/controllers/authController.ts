@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { sign } from "jsonwebtoken";
 import { resolve } from "path";
-const bcrypt = require("bcrypt");
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 //ini harusnya pake database
@@ -64,14 +64,15 @@ export const AuthController = {
             };
             
             //TODO: hashPassword pake bcrypt dengan salt 10 disini
-            // var salt = bcrypt.genSaltSync(10);
+            var salt = bcrypt.genSaltSync(10);
+            var hashed_password = bcrypt.hashSync(password, salt);
 
             const currDatetime = new Date();
             const newUser = await prisma.user.create({
                 data: {
                     username: username,
                     email: email,
-                    password_hash: password,
+                    password_hash: hashed_password,
                     created_at: currDatetime,
                     updated_at: currDatetime
                 }
@@ -107,8 +108,7 @@ export const AuthController = {
                 res.status(400).json({ message: "Email or Password is wrong" });
                 return;
             }
-
-            const isPasswordvalid = user.password_hash === password;
+            const isPasswordvalid = bcrypt.compareSync(password, user.password_hash);
             if(!isPasswordvalid){
                 res.status(400).json({ message: "Email or Password is wrong" });
                 return;
