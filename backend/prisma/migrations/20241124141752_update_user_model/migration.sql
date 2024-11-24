@@ -1,0 +1,16 @@
+-- AlterTable
+ALTER TABLE "Chat" ALTER COLUMN "timestamp" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "Feed" ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ,
+ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "PushSubscription" ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "full_name" TEXT,
+ADD COLUMN     "skills" TEXT,
+ADD COLUMN     "work_history" TEXT,
+ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ,
+ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMPTZ;

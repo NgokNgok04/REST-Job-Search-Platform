@@ -28,7 +28,7 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?schema=public
     depends_on:
       - db
-    command: ["npx", "prisma", "migrate", "deploy"]
+    command: ["npx", "prisma", "migrate", "dev"]
     networks:
       - app-network
 
