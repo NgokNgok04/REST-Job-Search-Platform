@@ -21,6 +21,17 @@ services:
     networks:
       - app-network
 
+  # debugging lama ini kurang woey astaga
+  migration: 
+    build: ./backend
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?schema=public
+    depends_on:
+      - db
+    command: ["npx", "prisma", "migrate", "deploy"]
+    networks:
+      - app-network
+
   frontend:
     build: ./frontend
     ports:
@@ -34,6 +45,7 @@ services:
       - backend
     networks:
       - app-network
+
   db:
     image: postgres:latest
     environment:
@@ -42,7 +54,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:
