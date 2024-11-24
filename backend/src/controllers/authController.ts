@@ -114,17 +114,19 @@ export const AuthController = {
                 return;
             }
             
-            const token = await new Promise((resolve, reject) => {
-                sign({ id: user.id.toString, email: user.email, password: user.password_hash}, secret.key, (err: any, token: any) => {
-                    if(err){
-                        reject(err);
-                    }
-                    resolve(token);
-                })
-            })
-
+            const token = sign(
+                { id: user.id.toString, email: user.email, password: user.password_hash}, 
+                secret.key, 
+                { expiresIn: "1h" })
+            
             if(token){
-                res.status(200).json({ message: "Login successful", token: token });
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    maxAge: 3600,
+                });
+
+                res.status(200).json({ message: "Login successful", token: token});
                 return;
             }
             else{

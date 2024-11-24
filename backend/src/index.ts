@@ -11,6 +11,7 @@ const app = express();
 // w gatau best practice gimana, tapi di stack overflow gini 
 app.use(cors({
   origin: "http://localhost:5173",
+  credentials: true
 }))
 app.use(express.json());
 

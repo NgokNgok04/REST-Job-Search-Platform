@@ -20,7 +20,8 @@ const LoginPage = () => {
                 headers:{
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                credentials: "include",
+                body: JSON.stringify({ email, password })
             });
             const data = await response.json();
             if (!response.ok){
@@ -29,10 +30,10 @@ const LoginPage = () => {
                 setSuccess(true);
                 console.log(success);
                 localStorage.setItem("token", data.token);
-                console.log("token: ", data.token);
             }
         } catch (err: any){
             setError(err);
+            
         }
     }
 
