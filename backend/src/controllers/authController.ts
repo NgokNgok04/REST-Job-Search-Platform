@@ -44,16 +44,7 @@ export const AuthController = {
             res.status(400).json({ message: "Password must contain one uppercase letter, one number, and one special character" });
             return;
         }
-
-        const newUser = await prisma.user.create({
-            data: {
-                username: username,
-                email: email,
-                password_hash: password
-            }
-        });
-        res.status(201).json({ message: "User created successfully" });
-        return;
+        
         try {
             // check email dalam db 
             const isExistUser = await prisma.user.findUnique({
@@ -68,11 +59,14 @@ export const AuthController = {
             };
             //TODO: hashPassword pake bcrypt dengan salt 10 disini
             
+            const currDatetime = new Date();
             const newUser = await prisma.user.create({
                 data: {
                     username: username,
                     email: email,
-                    password_hash: password
+                    password_hash: password,
+                    created_at: currDatetime,
+                    updated_at: currDatetime
                 }
             });
             if(newUser){

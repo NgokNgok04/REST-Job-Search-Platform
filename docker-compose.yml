@@ -42,7 +42,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/prisma/migrations/20241122105114_init/migration.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:
