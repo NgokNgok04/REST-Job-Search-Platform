@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../prisma";
 import { sign } from "jsonwebtoken";
 import { resolve } from "path";
 import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+
 //ini harusnya pake database
 const users: {
     username: string;
