@@ -1,11 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { sign } from "jsonwebtoken";
-import { resolve } from "path";
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const prisma = new PrismaClient();
 
-//  thanks to stackoverflow
+
+const secret = process.env.JWT_SECRET;
+
 const validateEmail = (email: string) => {
     return String(email).toLowerCase().match(
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -18,9 +21,7 @@ const passwordChecker = (password: string) => {
     return passwordRegex.test(password);
 }
 
-const secret = {
-    key: "A_SECRET_TEMPLATE"
-}
+
 
 export const AuthController = {
     signup: async (req: any, res: any) => {
@@ -55,7 +56,6 @@ export const AuthController = {
                 return;
             };
             
-            //TODO: hashPassword pake bcrypt dengan salt 10 disini
             var salt = bcrypt.genSaltSync(10);
             var hashed_password = bcrypt.hashSync(password, salt);
 
@@ -65,7 +65,7 @@ export const AuthController = {
                     username: username,
                     email: email,
                     password_hash: hashed_password,
-                    full_name: name, 
+                    full_name: name,
                     created_at: currDatetime,
                     updated_at: currDatetime
                 }
@@ -112,22 +112,26 @@ export const AuthController = {
                 }});
                 return;
             }
-            
+            if (!secret) {
+                throw new Error('JWT_SECRET is not defined in environment variables');
+            }
+
             const token = sign(
                 { id: user.id.toString, email: user.email, password: user.password_hash}, 
-                secret.key, 
+                secret, 
                 { expiresIn: "1h" }
             )
             
             if(token){
-                res.cookie('token', token, {
+                res.cookie('authToken', token, {
                     httpOnly: true,
                     sameSite: 'strict',
-                    maxAge: 3600,
+                    expires: new Date(Date.now() + 3600000),
+                    secure: true
                 });
 
                 res.status(200).json({status: true, message: "Login successful", body:{
-                    token: token
+                    token: token,
                 }});
                 return;
             }
@@ -145,6 +149,47 @@ export const AuthController = {
             }});
             return;
         }
+    }, 
 
+    logout: async (req: any, res: any) => {
+        try{
+            const token = req.cookies.authToken;
+            if(!token){
+                res.status(400).json({status: false, message: "You are not logged in"});
+                return;
+            }
+            else{
+                res.clearCookie('authToken');
+                res.status(200).json({status: true, message: "Logout success"});
+                return;
+            }
+
+        }catch(err){
+            res.status(400).json({status: false, message: "Your are not logged in"});
+            return
+        }
+    },
+
+    //debugging
+    test: async (req: any, res: any) => {
+        try{
+            const users = await prisma.user.findMany(); 
+
+            const payloadUser = users.map(user => ({
+                id: user.id.toString(),
+                username: user.username,
+                email: user.email,
+                full_name: user.full_name
+            }))
+
+            res.status(200).json({status: true, message: "Test success", body: payloadUser});
+        }
+        catch(err){
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            res.status(500).json({status: true, message: errorMessage, body:{
+                token: null
+            }});
+        }
     }
+
 }
