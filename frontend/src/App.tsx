@@ -4,6 +4,7 @@ import "./App.css";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import Dashboard from "./components/Dashboard";
+import UsersList from "./components/UsersList";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<Dashboard />} />
+        <Route path="/users" element={<UsersList />} />
       </Routes>
     </Router>
   );

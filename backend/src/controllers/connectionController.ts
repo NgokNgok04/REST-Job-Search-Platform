@@ -74,11 +74,9 @@ export const sendConnectionRequest = async (req: Request, res: Response) => {
 
     res.status(201).json(serializeConnectionAndRequest(request));
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
@@ -121,12 +119,9 @@ export const respondToRequest = async (req: Request, res: Response) => {
   }
 
   if (!action || !["accept", "reject"].includes(action)) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "Invalid 'action' parameter. Allowed values: 'accept' or 'reject'",
-      });
+    return res.status(400).json({
+      error: "Invalid 'action' parameter. Allowed values: 'accept' or 'reject'",
+    });
   }
 
   const fromIdBigInt = BigInt(from_id);
@@ -172,6 +167,43 @@ export const respondToRequest = async (req: Request, res: Response) => {
     }
 
     res.status(200).json({ message: "Request processed successfully." });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to process connection request." });
+  }
+};
+
+export const unconnectConnection = async (req: Request, res: Response) => {
+  const { from_id, to_id } = req.body;
+
+  if (!from_id || isNaN(Number(from_id))) {
+    return res
+      .status(400)
+      .json({ error: "Invalid or missing 'from_id' parameter" });
+  }
+
+  if (!to_id || isNaN(Number(to_id))) {
+    return res
+      .status(400)
+      .json({ error: "Invalid or missing 'to_id' parameter" });
+  }
+
+  const fromIdBigInt = BigInt(from_id);
+  const toIdBigInt = BigInt(to_id);
+
+  try {
+    const request = await prisma.connection.findFirst({
+      where: { from_id: fromIdBigInt, to_id: toIdBigInt },
+    });
+
+    if (!request) {
+      return res.status(404).json({ error: "Request not found." }); 
+    }
+
+    await prisma.connection.delete({
+      where: { from_id_to_id: { from_id: fromIdBigInt, to_id: toIdBigInt } },
+    });
+
+    res.status(200).json({ message: "Connection unconnected successfully." });
   } catch (error) {
     res.status(500).json({ error: "Failed to process connection request." });
   }
