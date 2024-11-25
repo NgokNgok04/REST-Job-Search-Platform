@@ -8,6 +8,7 @@ import {
   getPendingRequests,
   respondToRequest,
   getConnections,
+  unconnectConnection,
 } from "./controllers/connectionController";
 // import jwt from "jsonwebtoken";
 // import cookieParser from "cookie-parser";
@@ -39,6 +40,7 @@ app.post("/api/connections/request", sendConnectionRequest);
 app.get("/api/connections/requests/:userId", getPendingRequests);
 app.post("/api/connections/respond", respondToRequest);
 app.get("/api/connections/:userId", getConnections);
+app.delete("/api/connections/unconnect", unconnectConnection);
 
 const server = app.listen(3000, () => {
   console.log("Server listening on port 3000...");

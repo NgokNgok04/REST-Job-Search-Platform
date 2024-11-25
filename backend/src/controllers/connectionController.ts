@@ -93,7 +93,7 @@ export const getPendingRequests = async (req: Request, res: Response) => {
 
   try {
     const requests = await prisma.connectionRequest.findMany({
-      where: { from_id: userId },
+      where: { to_id: userId },
       orderBy: { created_at: "desc" },
     });
 
@@ -199,9 +199,14 @@ export const unconnectConnection = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Request not found." }); 
     }
 
-    await prisma.connection.delete({
-      where: { from_id_to_id: { from_id: fromIdBigInt, to_id: toIdBigInt } },
-    });
+    await prisma.$transaction([
+      prisma.connection.delete({
+        where: { from_id_to_id: { from_id: fromIdBigInt, to_id: toIdBigInt } },
+      }),
+      prisma.connection.delete({
+        where: { from_id_to_id: { from_id: toIdBigInt, to_id: fromIdBigInt } },
+      }),
+    ]);
 
     res.status(200).json({ message: "Connection unconnected successfully." });
   } catch (error) {

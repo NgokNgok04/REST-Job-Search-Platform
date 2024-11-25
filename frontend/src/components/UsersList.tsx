@@ -22,11 +22,15 @@ const debounce = (func: Function, delay: number) => {
   };
 };
 
-const UsersList = () => {
+interface Props {
+  loggedUser: string; 
+}
+const UsersList:  React.FC<Props> = ({ loggedUser }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [sendingRequest, setSendingRequest] = useState<string | null>(null); 
 
   const fetchUsers = async (query: string = ""): Promise<void> => {
     setLoading(true);
@@ -53,6 +57,28 @@ const UsersList = () => {
     const value = e.target.value;
     setSearch(value);
     debouncedFetchUsers(value);
+  };
+
+  const sendConnectionRequest = async (toId: string) => {
+    setSendingRequest(toId);
+    setError("");
+
+    try {
+      await axios.post("http://localhost:3000/api/connections/request", {
+        from_id: loggedUser, 
+        to_id: toId,
+      });
+
+      alert("Connection request sent successfully!");
+    } catch (err: any) {
+      if (err.response && err.response.data.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Failed to send connection request.");
+      }
+    } finally {
+      setSendingRequest(null);
+    }
   };
 
   useEffect(() => {
@@ -90,11 +116,25 @@ const UsersList = () => {
               <strong>Username:</strong> {user.username}
             </p>
             <p>
-              <strong>photo:</strong> {user.profile_photo_path}
+              <strong>Photo:</strong> {user.profile_photo_path || "N/A"}
             </p>
             <p>
               <strong>Full Name:</strong> {user.full_name || "N/A"}
             </p>
+            <button
+              onClick={() => sendConnectionRequest(user.id)}
+              disabled={sendingRequest === user.id}
+              style={{
+                padding: "10px",
+                backgroundColor: sendingRequest === user.id ? "#ccc" : "#007BFF",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: sendingRequest === user.id ? "not-allowed" : "pointer",
+              }}
+            >
+              {sendingRequest === user.id ? "Sending..." : "Send Request"}
+            </button>
           </li>
         ))}
       </ul>
