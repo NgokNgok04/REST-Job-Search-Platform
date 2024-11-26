@@ -45,14 +45,16 @@ const RegisterPage = () => {
                     setIsRegistered(true);
                     // console.log(data.message);
                     // console.log(data.user);
+                    console.log("response ok");
                 }
                 else{
+                    console.log("response not ok");
                     const data = await response.json();
-                    setError(data.message || "Something went wrong");
+                    setError(data.message || "Something went wrong data");
                     console.log(data.user);
                 }
             } catch{
-                setError("Something went wrong");
+                setError("Something went wrong cathc");
             }
         } catch (err: any){
             setError(err);
@@ -60,14 +62,14 @@ const RegisterPage = () => {
     }
 
     return (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex items-center justify-center h-screen">
             <div className="flex flex-col p-6 border rounded shadow-lg">
-                <h2 className="text-2xl mb-4">Register</h2>
+                <h2 className="mb-4 text-2xl">Register</h2>
                 {/* username */}
                 <input 
                     type="text" 
                     placeholder="username" 
-                    className="mb-2 p-2 border rounded-sm"
+                    className="p-2 mb-2 border rounded-sm"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -76,7 +78,7 @@ const RegisterPage = () => {
                 <input 
                     type="email" 
                     placeholder="mail@gmail.com" 
-                    className="mb-2 p-2 border rounded-sm"
+                    className="p-2 mb-2 border rounded-sm"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -85,7 +87,7 @@ const RegisterPage = () => {
                 <input 
                     type="text" 
                     placeholder="name" 
-                    className="mb-2 p-2 border rounded-sm"
+                    className="p-2 mb-2 border rounded-sm"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -94,7 +96,7 @@ const RegisterPage = () => {
                 <input
                     type="password" 
                     placeholder="password"
-                    className="mb-2 p-2 border rounded-sm"
+                    className="p-2 mb-2 border rounded-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -103,13 +105,13 @@ const RegisterPage = () => {
                 <input
                     type="password" 
                     placeholder="confirm password"
-                    className="mb-2 p-2 border rounded-sm"
+                    className="p-2 mb-2 border rounded-sm"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                 />
                 <button onClick={handleRegister}>Register</button>
-                {error && <p className="text-red-500 mt-2">{error}</p>}
+                {error && <p className="mt-2 text-red-500">{error}</p>}
                 {isRegistered && <Navigate to="/login" />}
             </div>
         </div>

@@ -1,9 +1,17 @@
 import express, { Request, Response } from "express";
+import cors from "cors";
 import { AuthController } from "./controllers/authController";
 import { ProfileController } from "./controllers/profileController";
-import cors from "cors";
 import { AuthMiddleware } from "./controllers/authMiddleware";
 import cookieParser from "cookie-parser";
+import { getUsers } from "./controllers/userController";
+import {
+  sendConnectionRequest,
+  getPendingRequests,
+  respondToRequest,
+  getConnections,
+  unconnectConnection,
+} from "./controllers/connectionController";
 
 const app = express();
 
@@ -30,14 +38,7 @@ app.get("/api", (req, res) => {
 
 app.post("/api/register", AuthController.signup);
 app.post("/api/login", AuthController.signin);
-
-app.get("/api/profil/:id", ProfileController.getProfile);
-app.put("/api/profil/:id", ProfileController.setProfile);
-app.get(
-  "/api/profil",
-  AuthMiddleware.authorization,
-  ProfileController.getAllProfiles
-);
+app.get("/api/test", AuthMiddleware.authorization, AuthController.test);
 
 app.post("/api/logout", AuthController.logout);
 app.get(
@@ -52,8 +53,26 @@ app.get(
   }
 );
 
+app.get("/api/profil/:id", ProfileController.getProfile);
+app.put("/api/profil/:id", ProfileController.setProfile);
+app.get(
+  "/api/profil",
+  AuthMiddleware.authorization,
+  ProfileController.getAllProfiles
+);
+
 app.get("/api/test", AuthMiddleware.authorization, AuthController.test);
 
-app.listen(3000, () => {
+// User routes
+app.get("/api/users", getUsers);
+
+// Connection routes
+app.post("/api/connections/request", sendConnectionRequest);
+app.get("/api/connections/requests/:userId", getPendingRequests);
+app.post("/api/connections/respond", respondToRequest);
+app.get("/api/connections/:userId", getConnections);
+app.delete("/api/connections/unconnect", unconnectConnection);
+
+const server = app.listen(3000, () => {
   console.log("Server listening on port 3000...");
 });
