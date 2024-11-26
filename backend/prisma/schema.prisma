@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,23 +15,24 @@ model User {
   full_name             String?
   work_history          String?
   skills                String?
-  created_at            DateTime            @default(now()) @db.Timestamptz
-  updated_at            DateTime            @updatedAt @db.Timestamptz
-  Feed                  Feed[]
+  profile_photo_path    String?
+  created_at            DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime            @updatedAt @db.Timestamptz(6)
   ChatFrom              Chat[]              @relation("ChatFrom")
   ChatTo                Chat[]              @relation("ChatTo")
-  ConnectionRequestFrom ConnectionRequest[] @relation("ConnectionRequestFrom")
-  ConnectionRequestTo   ConnectionRequest[] @relation("ConnectionRequestTo")
   ConnectionFrom        Connection[]        @relation("ConnectionFrom")
   ConnectionTo          Connection[]        @relation("ConnectionTo")
+  ConnectionRequestFrom ConnectionRequest[] @relation("ConnectionRequestFrom")
+  ConnectionRequestTo   ConnectionRequest[] @relation("ConnectionRequestTo")
+  Feed                  Feed[]
   PushSubscription      PushSubscription[]
 }
 
 model Feed {
   id         BigInt   @id @default(autoincrement())
   content    String
-  created_at DateTime @default(now()) @db.Timestamptz
-  updated_at DateTime @updatedAt @db.Timestamptz
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
   user_id    BigInt
   User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -46,7 +41,7 @@ model Feed {
 
 model Chat {
   id        BigInt   @id @default(autoincrement())
-  timestamp DateTime @default(now()) @db.Timestamptz
+  timestamp DateTime @default(now()) @db.Timestamptz(6)
   from_id   BigInt
   to_id     BigInt
   message   String
@@ -80,8 +75,8 @@ model PushSubscription {
   endpoint   String   @id
   user_id    BigInt?
   keys       Json
-  created_at DateTime @default(now()) @db.Timestamptz
-  User       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  User       User?    @relation(fields: [user_id], references: [id])
 
   @@index([user_id])
 }

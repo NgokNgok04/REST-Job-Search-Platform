@@ -4,8 +4,12 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "full_name" TEXT,
+    "work_history" TEXT,
+    "skills" TEXT,
+    "profile_photo_path" TEXT,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -14,8 +18,8 @@ CREATE TABLE "User" (
 CREATE TABLE "Feed" (
     "id" BIGSERIAL NOT NULL,
     "content" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL,
     "user_id" BIGINT NOT NULL,
 
     CONSTRAINT "Feed_pkey" PRIMARY KEY ("id")
@@ -24,7 +28,7 @@ CREATE TABLE "Feed" (
 -- CreateTable
 CREATE TABLE "Chat" (
     "id" BIGSERIAL NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "timestamp" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "from_id" BIGINT NOT NULL,
     "to_id" BIGINT NOT NULL,
     "message" TEXT NOT NULL,
@@ -55,7 +59,7 @@ CREATE TABLE "PushSubscription" (
     "endpoint" TEXT NOT NULL,
     "user_id" BIGINT,
     "keys" JSONB NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "PushSubscription_pkey" PRIMARY KEY ("endpoint")
 );
