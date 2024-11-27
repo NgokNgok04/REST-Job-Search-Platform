@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import UsersList from "./components/UsersList";
 import ConnectionRequests from "./components/ConnectionRequest";
 import ConnectionsList from "./components/Connection";
+import ProfilPage from "./Pages/Profile";
 
 function App() {
   return (
@@ -46,6 +47,14 @@ function App() {
         <Route
           path="/connections"
           element={<ConnectionsList loggedUser="2" />}
+        />
+        <Route
+          path="/profil/:id"
+          element={
+            <Layout cn="bg-[#F4F2EE]">
+              <ProfilPage />
+            </Layout>
+          }
         />
       </Routes>
     </Router>

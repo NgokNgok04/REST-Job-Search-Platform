@@ -22,12 +22,6 @@ app.use(
     credentials: true,
   })
 );
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", "*");
-//   res.setHeader("Access-Control-Allow-Origin", "GET, POST, PUT, DELETE");
-//   res.setHeader("Access-Control-Allow-Origin", "Content-Type");
-//   next();
-// });
 
 app.use(express.json());
 app.use(cookieParser());
