@@ -2,9 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import responseAPI from "../utils/responseAPI";
 import User from "../models/User";
-import { response } from "express";
 import Connection from "../models/Connection";
-import Auth from "../models/Auth";
+import { response } from "express";
 const prisma = new PrismaClient();
 
 export const ProfileController = {
@@ -59,13 +58,7 @@ export const ProfileController = {
 
       //publik
       if (!isLogin) {
-        responseAPI(
-          res,
-          200,
-          true,
-          `Success get Profile from Public : ${isLogin}`,
-          data
-        );
+        responseAPI(res, 200, true, `Success get Profile from Public`, data);
         return;
       }
 
@@ -99,37 +92,26 @@ export const ProfileController = {
       const { username, profile_photo_path, full_name, work_history, skills } =
         req.body;
       if (username == "") {
-        res
-          .status(400)
-          .json({ status: false, message: "Username cant be empty" });
-        console.log("halooo");
+        responseAPI(res, 200, true, "Username cant be empty");
         return;
       }
 
       const profileData = {
         username: username,
+        profile_photo_path: "",
         full_name: full_name,
         work_history: work_history,
         skills: skills,
-        profile_photo_path: "",
       };
       // if (req.file) {
       //   profileData.profile_photo_path = profile_photo_path.path;
       // }
-      await prisma.user.update({
-        where: {
-          id: Number(req.params.id),
-        },
-        data: profileData,
-      });
-      res.status(200).json({
-        status: true,
-        message: "Profile updated successfully",
-      });
+      User.setUser(req.params.id, profileData);
+      responseAPI(res, 200, true, "Profile updated successfuly");
+      return;
     } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, message: "Internal server error", body: null });
+      responseAPI(res, 500, false, "Internal Server Error");
+      return;
     }
   },
 };

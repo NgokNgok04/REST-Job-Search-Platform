@@ -49,11 +49,7 @@ app.get(
 
 app.get("/api/profil/:id", ProfileController.getProfile);
 app.put("/api/profil/:id", ProfileController.setProfile);
-app.get(
-  "/api/profil",
-  AuthMiddleware.authorization,
-  ProfileController.getAllProfiles
-);
+app.get("/api/profil", ProfileController.getAllProfiles);
 
 app.get("/api/test", AuthMiddleware.authorization, AuthController.test);
 

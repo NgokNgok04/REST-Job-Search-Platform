@@ -9,6 +9,7 @@ import UsersList from "./components/UsersList";
 import ConnectionRequests from "./components/ConnectionRequest";
 import ConnectionsList from "./components/Connection";
 import ProfilPage from "./Pages/Profile";
+import WorkHistory from "./components/Profile/WorkHistory";
 
 function App() {
   return (
@@ -51,8 +52,16 @@ function App() {
         <Route
           path="/profil/:id"
           element={
-            <Layout cn="bg-[#F4F2EE]">
+            <Layout cn="">
               <ProfilPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/profil/work-history/:id"
+          element={
+            <Layout>
+              <WorkHistory />
             </Layout>
           }
         />
