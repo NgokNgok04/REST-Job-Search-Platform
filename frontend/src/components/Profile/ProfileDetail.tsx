@@ -20,17 +20,25 @@ export default function ProfileDetail({
 }: SectionProps) {
   const parsedWork = parseWorkHistory(work_history ?? "");
   const parsedSkills = parseSkills(skills ?? "");
-  const id = useParams();
+  const { id } = useParams();
+  console.log("load page ini");
+  if (!work_history) {
+    console.log("INI WORK HISTORY PAGE");
+  } else {
+    console.log("BUKAN GES");
+  }
+  console.log("status isOwner : ", isOwner);
+  console.log("status work history : ", !!work_history);
   return (
     <div className="flex flex-col pl-5 pr-1 py-2 bg-white rounded-lg w-full max-w-[576px]">
       <div className="flex flex-row justify-between items-center">
         <h1 className="text-[20px] font-semibold">{section}</h1>
-        {isOwner && !!work_history && (
+        {isOwner && section == "Work History" && (
           <div className="flex flex-row">
             <AddWorkHistory data={work_history ?? ""} logo={addLogo} />
             <div className="w-full">
               <a
-                href={`/profil/work-history/${id.id}`}
+                href={`/profil/work-history/${id}`}
                 className="flex px-2 py-2 mt-1 mr-1 rounded-full  hover:bg-[#F3F3F3]"
               >
                 <img src={editLogo} width={20} />
@@ -38,13 +46,16 @@ export default function ProfileDetail({
             </div>
           </div>
         )}
-        {isOwner && !!skills && (
+        {isOwner && section == "Skills" && (
           <div className="flex flex-row">
             <AddSkills data={skills ?? ""} logo={addLogo} />
             <div className="w-full">
-              <button className="flex px-2 py-2 mt-1 mr-1 rounded-full  hover:bg-[#F3F3F3]">
+              <a
+                href={`/profil/skills/${id}`}
+                className="flex px-2 py-2 mt-1 mr-1 rounded-full  hover:bg-[#F3F3F3]"
+              >
                 <img src={editLogo} width={20} />
-              </button>
+              </a>
             </div>
           </div>
         )}
@@ -86,6 +97,12 @@ export default function ProfileDetail({
             </div>
           );
         })}
+
+      {section == "Work History" && !work_history && (
+        <div> No {section} yet</div>
+      )}
+      {section == "Skills" && !skills && <div> No {section} yet</div>}
+      {section == "Latest Posts" && <div> No {section} yet</div>}
     </div>
   );
 }

@@ -20,6 +20,11 @@ export function findIndexWorkData(listData: DataWork[], data: DataWork) {
   return index;
 }
 
+export function findIndexSkills(listData: string[], data: string) {
+  const index = listData.findIndex((item: string) => item === data);
+  return index;
+}
+
 export function mapWorkHistory(data: string) {
   return data.split("{$}");
 }

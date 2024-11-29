@@ -36,7 +36,7 @@ export default function AddSkills({ data, logo }: AddSkillsProps) {
   async function handleSkills(values: z.infer<typeof formSchema>) {
     try {
       console.log(values);
-      const result = data + "{$}" + values.skill;
+      const result = `${data ? data + "{$}" + values.skill : values.skill}`;
       const profileData = {
         skills: result,
       };

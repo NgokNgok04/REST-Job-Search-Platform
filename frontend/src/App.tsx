@@ -10,6 +10,7 @@ import ConnectionRequests from "./components/ConnectionRequest";
 import ConnectionsList from "./components/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
+import Skills from "./components/Profile/Skills";
 
 function App() {
   return (
@@ -62,6 +63,14 @@ function App() {
           element={
             <Layout>
               <WorkHistory />
+            </Layout>
+          }
+        />
+        <Route
+          path="/profil/skills/:id"
+          element={
+            <Layout>
+              <Skills />
             </Layout>
           }
         />
