@@ -2,9 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import responseAPI from "../utils/responseAPI";
 import User from "../models/User";
-import { response } from "express";
 import Connection from "../models/Connection";
-import Auth from "../models/Auth";
 const prisma = new PrismaClient();
 
 export const ProfileController = {
@@ -59,13 +57,7 @@ export const ProfileController = {
 
       //publik
       if (!isLogin) {
-        responseAPI(
-          res,
-          200,
-          true,
-          `Success get Profile from Public : ${isLogin}`,
-          data
-        );
+        responseAPI(res, 200, true, `Success get Profile from Public`, data);
         return;
       }
 
@@ -96,13 +88,12 @@ export const ProfileController = {
   },
   setProfile: async (req: any, res: any) => {
     try {
-      const { username, profile_photo_path, full_name, work_history, skills } =
+      const { username, full_name, profile_photo_path, work_history, skills } =
         req.body;
+      const file = req.file;
+
       if (username == "") {
-        res
-          .status(400)
-          .json({ status: false, message: "Username cant be empty" });
-        console.log("halooo");
+        responseAPI(res, 200, true, "Username cant be empty");
         return;
       }
 
@@ -110,26 +101,25 @@ export const ProfileController = {
         username: username,
         full_name: full_name,
         work_history: work_history,
+        profile_photo_path: profile_photo_path,
         skills: skills,
-        profile_photo_path: "",
+      } as {
+        username: string;
+        full_name: string;
+        work_history: string;
+        skills: string;
+        profile_photo_path: string;
       };
-      // if (req.file) {
-      //   profileData.profile_photo_path = profile_photo_path.path;
-      // }
-      await prisma.user.update({
-        where: {
-          id: Number(req.params.id),
-        },
-        data: profileData,
-      });
-      res.status(200).json({
-        status: true,
-        message: "Profile updated successfully",
-      });
+      if (file) {
+        profileData.profile_photo_path = `/store/${req.file.filename}`;
+      }
+
+      User.setUser(req.params.id, profileData);
+      responseAPI(res, 200, true, "Profile updated successfuly");
+      return;
     } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, message: "Internal server error", body: null });
+      responseAPI(res, 500, false, "Internal Server Error");
+      return;
     }
   },
 };

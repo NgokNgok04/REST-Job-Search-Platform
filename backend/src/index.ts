@@ -6,6 +6,8 @@ import { AuthMiddleware } from "./controllers/authMiddleware";
 import cookieParser from "cookie-parser";
 import { getUsers } from "./controllers/userController";
 import { ConnectionController } from "./controllers/connectionController";
+import upload from "./middleware/uploadImage";
+import path from "path";
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/store", express.static(path.join(__dirname, "../store")));
 
 app.post("/api/register", AuthController.signup);
 app.post("/api/login", AuthController.signin);
@@ -38,12 +42,12 @@ app.get(
 );
 
 app.get("/api/profil/:id", ProfileController.getProfile);
-app.put("/api/profil/:id", ProfileController.setProfile);
-app.get(
-  "/api/profil",
-  AuthMiddleware.authorization,
-  ProfileController.getAllProfiles
+app.put(
+  "/api/profil/:id",
+  upload.single("profile_photo_path"),
+  ProfileController.setProfile
 );
+app.get("/api/profil", ProfileController.getAllProfiles);
 
 app.get("/api/test", AuthMiddleware.authorization, AuthController.test);
 

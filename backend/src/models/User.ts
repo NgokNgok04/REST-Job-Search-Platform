@@ -10,6 +10,15 @@ class User {
     });
   }
 
+  static async setUser(id: number, profileData: any = {}) {
+    return await User.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: profileData,
+    });
+  }
+
   static async getPosts(id: number) {
     const Posts = await User.prisma.feed.findMany({
       where: {

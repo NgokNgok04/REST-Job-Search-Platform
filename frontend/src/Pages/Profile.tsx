@@ -7,6 +7,7 @@ import NotFound from "../components/NotFound";
 import { useParams } from "react-router-dom";
 import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
+import EditPP from "@/components/Profile/EditPP";
 
 type ProfileResponse = {
   status: boolean;
@@ -14,8 +15,8 @@ type ProfileResponse = {
   body: {
     username: string;
     name: string;
-    work_history: string[];
-    skills: string[];
+    work_history: string;
+    skills: string;
     isOwner: boolean;
     isConnected: boolean;
     connection_count: string;
@@ -33,8 +34,8 @@ type ProfileResponse = {
 const dummyData = {
   username: "Anonim",
   name: "Anonim",
-  work_history: [],
-  skills: [],
+  work_history: "",
+  skills: "",
   isOwner: false,
   isConnected: false,
   connection_count: "0",
@@ -84,33 +85,37 @@ export default function ProfilPage() {
     }
   }, [id]);
 
-  console.log(profileData);
   if (!isUserFound) {
     return <NotFound />;
   }
-  console.log(profileData?.body.isConnected);
   return (
     <div className="flex flex-col items-center mt-4 border-1 w-full gap-4">
-      <div className="bg-white rounded-lg">
+      <div className="bg-white rounded-lg pb-4">
         <div className="rounded-t-lg">
           <img
             className="h-[144px] w-full object-cover rounded-t-lg"
             src={bgLinkedIn}
             alt="Background Image"
           />
-          <img
-            className="absolute translate-y-[-55%] translate-x-[20px]"
-            src={profil}
-            width={100}
-            alt="Profile Image"
+          <EditPP
+            photo={profileData?.body.profile_photo ?? "/store" + profil}
           />
         </div>
+        {profileData?.body.isOwner && (
+          <EditProfile
+            fullName={profileData.body.name}
+            username={profileData.body.username}
+          />
+        )}
 
-        {profileData?.body.isOwner && <EditProfile />}
-        <div className="flex flex-col px-5 mt-14 gap-2 font-semibold">
-          <h1 className="text-[20px]">{profileData?.body.name}</h1>
+        <div
+          className={`flex flex-col px-5 ${
+            profileData?.body.isOwner ? "mt-2" : "mt-14"
+          } gap-2 font-semibold`}
+        >
+          <h1 className="text-[20px]">{profileData?.body.username}</h1>
           <h1 className="flex items-center text-[#0A66C2]">
-            {profileData?.body.connection_count} Connection{" "}
+            {profileData?.body.connection_count} Connection
           </h1>
         </div>
 
@@ -120,9 +125,20 @@ export default function ProfilPage() {
           </button>
         )}
       </div>
-      <ProfileDetail section="Work History" />
-      <ProfileDetail section="Skills" />
-      <ProfileDetail section="Latest Posts" />
+      <ProfileDetail
+        work_history={profileData?.body.work_history}
+        section="Work History"
+        isOwner={profileData?.body.isOwner}
+      />
+      <ProfileDetail
+        section="Skills"
+        isOwner={profileData?.body.isOwner}
+        skills={profileData?.body.skills}
+      />
+      <ProfileDetail
+        section="Latest Posts"
+        isOwner={profileData?.body.isOwner}
+      />
     </div>
   );
 }
