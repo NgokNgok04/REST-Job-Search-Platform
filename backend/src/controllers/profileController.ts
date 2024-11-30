@@ -96,16 +96,17 @@ export const ProfileController = {
         return;
       }
 
+      if (!req.file || !profile_photo_path) {
+        return responseAPI(res, 200, true, "No file uploaded.");
+      }
       const profileData = {
         username: username,
-        profile_photo_path: "",
+        profile_photo_path: `/store/${req.file.filename}`,
         full_name: full_name,
         work_history: work_history,
         skills: skills,
       };
-      // if (req.file) {
-      //   profileData.profile_photo_path = profile_photo_path.path;
-      // }
+
       User.setUser(req.params.id, profileData);
       responseAPI(res, 200, true, "Profile updated successfuly");
       return;

@@ -7,6 +7,7 @@ import NotFound from "../components/NotFound";
 import { useParams } from "react-router-dom";
 import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
+import EditPP from "@/components/Profile/EditPP";
 
 type ProfileResponse = {
   status: boolean;
@@ -96,12 +97,13 @@ export default function ProfilPage() {
             src={bgLinkedIn}
             alt="Background Image"
           />
-          <img
+          <EditPP photo={profil} />
+          {/* <img
             className="absolute translate-y-[-55%] translate-x-[20px]"
             src={profil}
             width={100}
             alt="Profile Image"
-          />
+          /> */}
         </div>
         {profileData?.body.isOwner && (
           <EditProfile
