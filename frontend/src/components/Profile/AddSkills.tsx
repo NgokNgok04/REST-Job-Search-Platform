@@ -45,6 +45,7 @@ export default function AddSkills({ data, logo }: AddSkillsProps) {
         console.log("SALAH bang");
       } else {
         console.log("BERHASIL BOS");
+        console.log(response.data.message);
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {

@@ -12,6 +12,7 @@ import {
   getConnections,
   unconnectConnection,
 } from "./controllers/connectionController";
+import upload from "./middleware/uploadImage";
 
 const app = express();
 
@@ -48,7 +49,11 @@ app.get(
 );
 
 app.get("/api/profil/:id", ProfileController.getProfile);
-app.put("/api/profil/:id", ProfileController.setProfile);
+app.put(
+  "/api/profil/:id",
+  upload.single("profile_photo_path"),
+  ProfileController.setProfile
+);
 app.get("/api/profil", ProfileController.getAllProfiles);
 
 app.get("/api/test", AuthMiddleware.authorization, AuthController.test);

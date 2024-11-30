@@ -21,14 +21,6 @@ export default function ProfileDetail({
   const parsedWork = parseWorkHistory(work_history ?? "");
   const parsedSkills = parseSkills(skills ?? "");
   const { id } = useParams();
-  console.log("load page ini");
-  if (!work_history) {
-    console.log("INI WORK HISTORY PAGE");
-  } else {
-    console.log("BUKAN GES");
-  }
-  console.log("status isOwner : ", isOwner);
-  console.log("status work history : ", !!work_history);
   return (
     <div className="flex flex-col pl-5 pr-1 py-2 bg-white rounded-lg w-full max-w-[576px]">
       <div className="flex flex-row justify-between items-center">
