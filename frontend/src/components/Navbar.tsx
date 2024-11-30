@@ -16,7 +16,7 @@ export default function Navbar() {
               />
               <p className="text-[#666666] font-normal text-[14px]">Feeds</p>
             </button>
-            <button className="flex flex-col items-center justify-center">
+            <button onClick={() => window.location.href = '/users'} className="flex flex-col items-center justify-center">
               <img
                 className="flex flex-col text-[#666666]"
                 src={peopleLogo}

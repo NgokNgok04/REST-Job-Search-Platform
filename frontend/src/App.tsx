@@ -11,6 +11,7 @@ import ConnectionsList from "./components/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
+import Chat from "./components/Chat";
 
 function App() {
   return (
@@ -71,6 +72,14 @@ function App() {
           element={
             <Layout>
               <Skills />
+            </Layout>
+          }
+        />
+        <Route
+          path="/chat" 
+          element = {
+            <Layout>
+              <Chat/>  
             </Layout>
           }
         />

@@ -147,6 +147,8 @@ export const AuthController = {
         {
           id: user.id.toString(),
           email: user.email,
+          username: user.username,
+          fullname: user.full_name,
           password: user.password_hash,
         },
         secret,
@@ -155,10 +157,10 @@ export const AuthController = {
 
       if (token) {
         res.cookie("authToken", token, {
-          httpOnly: true,
-          sameSite: "strict",
+          // httpOnly: true,
+          // sameSite: "strict",
           expires: new Date(Date.now() + 3600000),
-          secure: true,
+          // secure: true,
         });
 
         res.status(200).json({
@@ -218,7 +220,7 @@ export const AuthController = {
     try {
       const users = await prisma.user.findMany();
 
-      const payloadUser = users.map((user) => ({
+      const payloadUser = users.map((user: any) => ({
         id: user.id.toString(),
         username: user.username,
         email: user.email,
@@ -227,7 +229,7 @@ export const AuthController = {
 
       res
         .status(200)
-        .json({ status: true, message: "Test success", body: payloadUser });
+        .json({ status: true, message: "Test success", body: req.user });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       res.status(500).json({

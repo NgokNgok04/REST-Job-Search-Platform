@@ -17,7 +17,9 @@ export const AuthMiddleware = {
           .json({ status: false, message: "Internal Server Error" });
       }
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
+      
+      const { id, email, username } = decoded as { id: string; email: string; username: string };
+      req.user = { id, email, username };
       next();
     } catch (err) {
       return res.status(401).json({ status: false, message: "Unauthorized" });
