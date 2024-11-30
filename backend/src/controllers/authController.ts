@@ -215,6 +215,26 @@ export const AuthController = {
     }
   },
 
+
+  getUser: async (req: any, res: any) => {
+    try {
+      const user = req.user;
+      res.status(200).json({
+        status: true,
+        message: "User data fetched successfully",
+        body: user,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      res.status(500).json({
+        status: true,
+        message: errorMessage,
+        body: {
+          token: null,
+        },
+      });
+    }
+  },
   //debugging
   test: async (req: any, res: any) => {
     try {

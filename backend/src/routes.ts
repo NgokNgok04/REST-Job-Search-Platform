@@ -34,9 +34,9 @@ export const defineRoutes = (app: Express) => {
         });
         }
     );
-
-
+    app.get("/api/user", AuthMiddleware.authorization, AuthController.getUser);
     // Profile Routes
+    
     app.get("/api/profil/:id", ProfileController.getProfile);
     app.put("/api/profil/:id", ProfileController.setProfile);
     app.get("/api/profil", ProfileController.getAllProfiles);

@@ -2,17 +2,48 @@ import { useState, useEffect, useRef } from "react";
 
 // Define a type for messages
 interface Message {
-  message: string;
+  userId: string;
   username: string;
+  message: string;
 }
 
 const Chat = () => {
     const [myMessage, setMyMessage] = useState<string>("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [username, setUsername] = useState<string>(""); 
+    const [userId, setUserId] = useState<string>("");
     const socketRef = useRef<WebSocket | null>(null); 
 
+    // Fetch user data inside useEffect
     useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/user", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const data = await response.json();
+                if (response.ok && data.body) {
+                    if (data.body.username) {
+                        setUsername(data.body.username);
+                    }
+                    if (data.body.id) {
+                        setUserId(data.body.id);
+                    }
+                } else {
+                    console.warn("Invalid user data:", data);
+                }
+            } catch (err) {
+                console.error("Error fetching user data:", err);
+            }
+        };
+
+        fetchUserData(); 
+    }, []); 
+
+    useEffect(() => {
+        if (!username || !userId) return; // Wait until user data is set
+
         const newSocket = new WebSocket("ws://127.0.0.1:8000");
         socketRef.current = newSocket;
     
@@ -23,15 +54,15 @@ const Chat = () => {
         newSocket.onmessage = (message) => {
             try {
                 const data = JSON.parse(message.data);
-                console.log(data.type);
                 switch (data.type) {
                     case "message":
-                        if (data.message && data.username) {
+                        if (data.message && data.username && data.id) {
                             setMessages((prevMessages) => [
                                 ...prevMessages,
                                 {
-                                    message: data.message,
+                                    userId: data.id,
                                     username: data.username,
+                                    message: data.message,
                                 },
                             ]);
                         } else {
@@ -41,8 +72,8 @@ const Chat = () => {
     
                     case "welcome":
                         console.log("Welcome message received:", data);
-                        if (data.userId) {
-                            setUsername(data.userId); 
+                        if (data.username) {
+                            setUsername(data.username); // Correctly set username
                         }
                         break;
     
@@ -66,7 +97,7 @@ const Chat = () => {
             console.log("Cleaning up WebSocket connection...");
             newSocket.close();
         };
-    }, []); 
+    }, [username, userId]); // Depend on username and userId to wait for user data before opening socket
     
 
     const onSend = () => {
