@@ -8,11 +8,7 @@ interface ConnectionRequest {
   created_at: string;
 }
 
-interface Props {
-  loggedUser: string;
-}
-
-const ConnectionRequests: React.FC<Props> = ({ loggedUser }) => {
+const ConnectionRequests: React.FC = () => {
   const [requests, setRequests] = useState<ConnectionRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,11 +19,20 @@ const ConnectionRequests: React.FC<Props> = ({ loggedUser }) => {
 
     try {
       const response = await axios.get<ConnectionRequest[]>(
-        `http://localhost:3000/api/connections/requests/${loggedUser}`
+        `http://localhost:3000/api/connections/requests`,
+        { withCredentials: true }
       );
       setRequests(response.data);
-    } catch (err) {
-      setError("Failed to fetch connection requests.");
+    } catch (err: any) {
+      if (axios.isAxiosError(err) && err.response) {
+        const { success, message } = err.response.data;
+
+        if (!success) {
+          setError(message || "An error occurred.");
+        }
+      } else {
+        setError("Failed to fetch requests. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -38,29 +43,33 @@ const ConnectionRequests: React.FC<Props> = ({ loggedUser }) => {
     setError("");
 
     try {
-      await axios.post("http://localhost:3000/api/connections/respond", {
-        from_id: fromId,
-        to_id: loggedUser,
-        action,
-      });
+      await axios.post(
+        "http://localhost:3000/api/connections/respond",
+        { from_id: fromId, action },
+        { withCredentials: true }
+      );
 
       setRequests((prev) =>
         prev.filter((request) => request.from_id !== fromId)
       );
     } catch (err: any) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
+      if (axios.isAxiosError(err) && err.response) {
+        const { success, message } = err.response.data;
+
+        if (!success) {
+          setError(message || "An error occurred.");
+        }
       } else {
-        setError("Failed to send connection request.");
+        setError("Failed to fetch respond connection. Please try again later.");
       }
     } finally {
-      setActionLoading(null);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchRequests();
-  }, [loggedUser]);
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>

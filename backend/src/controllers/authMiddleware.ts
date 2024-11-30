@@ -9,8 +9,8 @@ export const AuthMiddleware = {
     if (!token) {
       return res.status(401).json({ status: false, message: "Unauthorized" });
     }
-
     try {
+
       if (!process.env.JWT_SECRET) {
         return res
           .status(500)

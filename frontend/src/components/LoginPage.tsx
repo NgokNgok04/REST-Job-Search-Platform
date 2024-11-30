@@ -45,25 +45,25 @@ const LoginPage = () => {
     console.log("BELUM MASUK");
   }
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col p-6 border rounded shadow-lg">
-        <h2 className="text-2xl mb-4">Login</h2>
+        <h2 className="mb-4 text-2xl">Login</h2>
         <input
           type="email"
           placeholder="mail@gmail.com"
-          className="mb-2 p-2 border rounded-sm"
+          className="p-2 mb-2 border rounded-sm"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           placeholder="password"
-          className="mb-2 p-2 border rounded-sm"
+          className="p-2 mb-2 border rounded-sm"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <button onClick={handleLogin}>Login</button>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
+        {error && <p className="mt-2 text-red-500">{error}</p>}
       </div>
     </div>
   );

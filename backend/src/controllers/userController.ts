@@ -17,20 +17,33 @@ export const getUsers = async (req: Request, res: Response) => {
     const users = await prisma.user.findMany({
       where: search
         ? {
-            username: {
-              contains: String(search),
-              mode: "insensitive",
-            },
+            OR: [
+              {
+                username: {
+                  contains: String(search),
+                  mode: "insensitive",
+                },
+              },
+              {
+                full_name: {
+                  contains: String(search),
+                  mode: "insensitive",
+                },
+              },
+            ],
           }
         : {},
     });
-    res.status(200).json(serializeUsers(users));
+    res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      body: serializeUsers(users),
+    });
   } catch (error) {
-    console.error("Error fetching users:", error);
-    res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch users.",
+      error: error instanceof Error ? { message: error.message } : null,
+    });
   }
 };

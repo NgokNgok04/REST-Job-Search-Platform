@@ -8,11 +8,7 @@ interface Connection {
   created_at: string;
 }
 
-interface Props {
-  loggedUser: string;
-}
-
-const ConnectionsList: React.FC<Props> = ({ loggedUser }) => {
+const ConnectionsList: React.FC = () => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,11 +20,19 @@ const ConnectionsList: React.FC<Props> = ({ loggedUser }) => {
 
     try {
       const response = await axios.get<Connection[]>(
-        `http://localhost:3000/api/connections/${loggedUser}`
+        `http://localhost:3000/api/connections/:userId`
       );
       setConnections(response.data);
-    } catch (err) {
-      setError("Failed to fetch connections.");
+    } catch (err: any) {
+      if (axios.isAxiosError(err) && err.response) {
+        const { success, message } = err.response.data;
+
+        if (!success) {
+          setError(message || "An error occurred.");
+        }
+      } else {
+        setError("Failed to fetch connections. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -40,16 +44,21 @@ const ConnectionsList: React.FC<Props> = ({ loggedUser }) => {
 
     try {
       await axios.delete("http://localhost:3000/api/connections/unconnect", {
-        data: { from_id: loggedUser, to_id: toId },
+        data: { to_id: toId },
+        withCredentials: true,
       });
 
       alert("Connection successfully unconnected.");
       fetchConnections();
     } catch (err: any) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
+      if (axios.isAxiosError(err) && err.response) {
+        const { success, message } = err.response.data;
+
+        if (!success) {
+          setError(message || "An error occurred.");
+        }
       } else {
-        setError("Failed to send connection request.");
+        setError("Failed to unconnect. Please try again later.");
       }
     } finally {
       setLoading(false);
@@ -58,7 +67,7 @@ const ConnectionsList: React.FC<Props> = ({ loggedUser }) => {
 
   useEffect(() => {
     fetchConnections();
-  }, [loggedUser]);
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>

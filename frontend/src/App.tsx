@@ -39,14 +39,14 @@ function App() {
           }
         />
         {/* TODO: change loggedUser */}
-        <Route path="/users" element={<UsersList loggedUser="1" />} />
+        <Route path="/users" element={<UsersList/>} />
         <Route
           path="/requests"
-          element={<ConnectionRequests loggedUser="2" />}
+          element={<ConnectionRequests/>}
         />
         <Route
           path="/connections"
-          element={<ConnectionsList loggedUser="2" />}
+          element={<ConnectionsList/>}
         />
         <Route
           path="/profil/:id"

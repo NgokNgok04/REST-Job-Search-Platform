@@ -22,10 +22,8 @@ const debounce = (func: Function, delay: number) => {
   };
 };
 
-interface Props {
-  loggedUser: string;
-}
-const UsersList: React.FC<Props> = ({ loggedUser }) => {
+
+const UsersList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -69,7 +67,6 @@ const UsersList: React.FC<Props> = ({ loggedUser }) => {
 
     try {
       await axios.post("http://localhost:3000/api/connections/request", {
-        from_id: loggedUser,
         to_id: toId,
       });
 
