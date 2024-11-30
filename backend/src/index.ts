@@ -13,6 +13,7 @@ import {
   unconnectConnection,
 } from "./controllers/connectionController";
 import upload from "./middleware/uploadImage";
+import path from "path";
 
 const app = express();
 
@@ -30,6 +31,8 @@ app.use(cookieParser());
 app.get("/api", (req, res) => {
   res.json({ test: ["berto", "matthew", "indra", "hs"] });
 });
+
+app.use("/store", express.static(path.join(__dirname, "../store")));
 
 app.post("/api/register", AuthController.signup);
 app.post("/api/login", AuthController.signin);

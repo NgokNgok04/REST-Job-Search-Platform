@@ -88,8 +88,9 @@ export const ProfileController = {
   },
   setProfile: async (req: any, res: any) => {
     try {
-      const { username, full_name, work_history, skills } = req.body;
-      const file = req.body;
+      const { username, full_name, profile_photo_path, work_history, skills } =
+        req.body;
+      const file = req.file;
 
       if (username == "") {
         responseAPI(res, 200, true, "Username cant be empty");
@@ -100,6 +101,7 @@ export const ProfileController = {
         username: username,
         full_name: full_name,
         work_history: work_history,
+        profile_photo_path: profile_photo_path,
         skills: skills,
       } as {
         username: string;
@@ -110,8 +112,6 @@ export const ProfileController = {
       };
       if (file) {
         profileData.profile_photo_path = `/store/${req.file.filename}`;
-        responseAPI(res, 200, true, "MASUK SINI BOSSQUE");
-        return;
       }
 
       User.setUser(req.params.id, profileData);
