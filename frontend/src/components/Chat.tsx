@@ -8,6 +8,7 @@ interface Message {
   userRecipiendId: string; 
   username: string;
   message: string;
+  timestamp: string; 
 }
 
 const Chat = () => {
@@ -37,7 +38,7 @@ const Chat = () => {
                     setUserId(data.body.id);
                 }
                 } else {
-                console.warn("Invalid user data:", data);
+                    console.warn("Invalid user data:", data);
                 }
             } catch (err) {
                 console.error("Error fetching user data:", err);
@@ -85,7 +86,6 @@ const Chat = () => {
                 });
 
                 const data = await response.json();
-                // Assuming `data.messages` contains the chat messages
                 if (response.ok) {
                     console.log(data.body);
                     const fetchedMessages: Message[] = data.body.map((msg: any) => ({
@@ -141,6 +141,7 @@ const Chat = () => {
                                     username: data.username,
                                     message: data.message,
                                     userRecipiendId: data.to,
+                                    timestamp: new Date().toISOString(),
                                 },
                             ]);
                         }
@@ -226,6 +227,7 @@ const Chat = () => {
                 <section>{message.username[0].toUpperCase()}</section>
                 <h4>{message.username + ":"}</h4>
                 <p>{message.message}</p>
+                <p>{message.timestamp}</p>
                 <br></br>
             </div>
             ))}
