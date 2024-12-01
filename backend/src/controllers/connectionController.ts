@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
 import { serializeUsers } from "./userController";
-import { error } from "console";
+
 
 const serializeConnectionAndRequest = (connection: any | any[]) => {
   const connections = Array.isArray(connection) ? connection : [connection];

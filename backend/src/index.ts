@@ -6,6 +6,7 @@ import { AuthMiddleware } from "./controllers/authMiddleware";
 import cookieParser from "cookie-parser";
 import { UserController } from "./controllers/userController";
 import { ConnectionController } from "./controllers/connectionController";
+import { FeedController } from "./controllers/feedController";
 import upload from "./middleware/uploadImage";
 import path from "path";
 
@@ -79,6 +80,20 @@ app.delete(
   "/api/connections/unconnect",
   AuthMiddleware.authorization,
   ConnectionController.unconnectConnection
+);
+
+// Feed routes
+app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
+app.post("/api/feed", AuthMiddleware.authorization, FeedController.createPost);
+app.put(
+  "/api/feed/:post_id",
+  AuthMiddleware.authorization,
+  FeedController.updatePost
+);
+app.delete(
+  "/api/feed/:post_id",
+  AuthMiddleware.authorization,
+  FeedController.deletePost
 );
 
 const server = app.listen(3000, () => {
