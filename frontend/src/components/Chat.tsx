@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { set } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
 // Define a type for messages
@@ -14,14 +15,66 @@ const Chat = () => {
     const [myMessage, setMyMessage] = useState<string>("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [username, setUsername] = useState<string>(""); 
+    const [recpUsername, setRecpUsername] = useState<string>("");
     const [userId, setUserId] = useState<string>("");
     const socketRef = useRef<WebSocket | null>(null);
 
     const recipientId = id?.toString();  
 
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/user", {
+                method: "GET",
+                credentials: "include",
+                });
+                const data = await response.json();
+                if (response.ok && data.body) {
+                if (data.body.username) {
+                    setUsername(data.body.username);
+                }
+                if (data.body.id) {
+                    setUserId(data.body.id);
+                }
+                } else {
+                console.warn("Invalid user data:", data);
+                }
+            } catch (err) {
+                console.error("Error fetching user data:", err);
+            }
+        };
+
+        const fetchRecipientData = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/api/user/${recipientId}`, {
+                    method: "GET", 
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include", 
+                });
+
+                const data = await response.json();
+                if (response.ok && data.body) {
+                    if (data.body.username) {
+                        setRecpUsername(data.body.username);
+                    }
+                } else {
+                    console.warn("Invalid user data:", data);
+                }
+            } catch (err) {
+                console.error("Error fetching user data:", err);
+            }
+        };
+
+        fetchUserData();
+        fetchRecipientData();
+    }, [recipientId]);
+
 
     useEffect(() => {
         const fetchChat = async () => {
+            if (!userId || !recpUsername || !recipientId) return;
             try {
                 const response = await fetch(`http://localhost:3000/api/chat/${id}`, {
                     method: "GET", 
@@ -35,8 +88,14 @@ const Chat = () => {
                 // Assuming `data.messages` contains the chat messages
                 if (response.ok) {
                     console.log(data.body);
-
-                    // setMessages();
+                    const fetchedMessages: Message[] = data.body.map((msg: any) => ({
+                        from_id: msg.from_id,
+                        to_id: msg.to_id,
+                        message: msg.message,
+                        timestamp: msg.timestamp,
+                        username: msg.from_id === userId ? username : recpUsername, 
+                    }));
+                    setMessages(fetchedMessages);
                 } else {
                     console.error("Failed to fetch messages:", data);
                 }
@@ -45,40 +104,11 @@ const Chat = () => {
             }
         };
 
-        if(userId && recipientId){
+        if(userId && recipientId && recpUsername){
             fetchChat();
         }
 
-    }, [userId, recipientId, id]);
-
-    
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/api/user", {
-            method: "GET",
-            credentials: "include",
-            });
-            const data = await response.json();
-            if (response.ok && data.body) {
-            if (data.body.username) {
-                setUsername(data.body.username);
-            }
-            if (data.body.id) {
-                setUserId(data.body.id);
-            }
-            } else {
-            console.warn("Invalid user data:", data);
-            }
-        } catch (err) {
-            console.error("Error fetching user data:", err);
-        }
-        };
-
-        fetchUserData();
-    }, []);
-
+    }, [userId, recipientId, id, recpUsername]);
 
     useEffect(() => {
         if (!username || !userId) return;
@@ -102,25 +132,25 @@ const Chat = () => {
                 switch (data.type) {
                 case "message":
                     if (data.message && data.username && data.from && data.to) {
-                    if ((data.from === userId && data.to === recipientId) || 
-                        (data.from === recipientId && data.to === userId)) {
-                        setMessages((prevMessages) => [
-                        ...prevMessages,
-                        {
-                            userId: data.from,
-                            username: data.username,
-                            message: data.message,
-                            userRecipiendId: data.to,
-                        },
-                        ]);
-                    }
+                        if ((data.from === userId && data.to === recipientId) || 
+                            (data.from === recipientId && data.to === userId)) {
+                            setMessages((prevMessages) => [
+                                ...prevMessages,
+                                {
+                                    userId: data.from,
+                                    username: data.username,
+                                    message: data.message,
+                                    userRecipiendId: data.to,
+                                },
+                            ]);
+                        }
                     } else {
-                    console.warn("Invalid 'message' format:", data);
+                        console.warn("Invalid 'message' format:", data);
                     }
                     break;
 
                 case "welcome":
-                    console.log("Welcome message received:", data);
+                    // console.log("Welcome message received:", data);
                     if (data.username) {
                     setUsername(data.username); 
                     }
@@ -135,16 +165,16 @@ const Chat = () => {
         };
 
         newSocket.onclose = () => {
-        console.log("WebSocket Client Disconnected");
+            console.log("WebSocket Client Disconnected");
         };
 
         newSocket.onerror = (error) => {
-        console.error("WebSocket encountered an error:", error);
+            console.error("WebSocket encountered an error:", error);
         };
 
         return () => {
-        console.log("Cleaning up WebSocket connection...");
-        newSocket.close();
+            console.log("Cleaning up WebSocket connection...");
+            newSocket.close();
         };
     }, [username, userId, recipientId]);
 

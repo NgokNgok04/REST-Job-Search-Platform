@@ -235,6 +235,54 @@ export const AuthController = {
       });
     }
   },
+
+  getUserById: async (req: any, res: any) => {
+    try {
+      const userId = req.params.id;
+      const user = await prisma.user.findUnique({
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          full_name: true,
+        },
+        where: {
+          id: Number(userId),
+        },
+      });
+
+      if (!user) {
+        res.status(404).json({
+          status: false,
+          message: "User not found",
+          body: null,
+        });
+        return;
+      }
+
+      const payloadUser = {
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email,
+        full_name: user.full_name,
+      };
+
+      res.status(200).json({
+        status: true,
+        message: "User data fetched successfully",
+        body: payloadUser,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      res.status(500).json({
+        status: true,
+        message: errorMessage,
+        body: {
+          token: null,
+        },
+      });
+    }
+  },
   //debugging
   test: async (req: any, res: any) => {
     try {
