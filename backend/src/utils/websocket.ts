@@ -53,23 +53,29 @@ export function startWebSocketServer(port: number) {
     });
 }
 
-function handleDirectMessage(senderId: string, data: any) {
-    const { recipientId, message } = data;
-    if (clients.has(recipientId)) {
-        const recipientWs = clients.get(recipientId)!;
-        recipientWs.send(JSON.stringify({
-            type: "message",
-            username: data.username, 
-            message,
-            from: senderId,
-            to: recipientId,
-        }));
+function handleDirectMessage(senderId: string, data: any){
+    const {recipientId, message} = data; 
+    const payload = JSON.stringify({
+        type: "message",
+        username: data.username,
+        message,
+        from: senderId,
+        to: recipientId,
+    });
 
+    if(clients.has(recipientId)){
+        const recipientWs = clients.get(recipientId)!;
+        recipientWs.send(payload);
     } else {
         const senderWs = clients.get(senderId)!;
         senderWs.send(JSON.stringify({
             type: "error",
             message: `User ${recipientId} is not connected`,
         }));
+    }
+
+    if(clients.has(senderId)){
+        const senderWs = clients.get(senderId)!;
+        senderWs.send(payload);
     }
 }

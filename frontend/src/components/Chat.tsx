@@ -65,18 +65,14 @@ const Chat = () => {
         newSocket.onmessage = (message) => {
             try {
                 const data = JSON.parse(message.data);
-                if(data.to == data.from){
-                    console.log("Message sent to self");
-                    return;
-                }
+
                 switch (data.type) {
                     case "message":
-                        console.log(data.message);
                         if (data.message && data.username && data.from && data.to) {
                             setMessages((prevMessages) => [
                                 ...prevMessages,
                                 {
-                                    userId: data.id,
+                                    userId: data.from,
                                     username: data.username,
                                     message: data.message,
                                     userRecipiendId: data.to,
@@ -86,7 +82,7 @@ const Chat = () => {
                             console.warn("Invalid 'message' format:", data);
                         }
                         break;
-                        
+                     
                     //testing 
                     case "welcome":
                         console.log("Welcome message received:", data);
@@ -146,7 +142,7 @@ const Chat = () => {
                             username === message.username ? "flex-end" : "flex-start"
                         }`}
                     >
-                        {/* <section>{message.username[0].toUpperCase()}</section> */}
+                        <section>{message.username[0].toUpperCase()}</section>
                         <h4>{message.username + ":"}</h4>
                         <p>{message.message}</p>
                         <br></br>
