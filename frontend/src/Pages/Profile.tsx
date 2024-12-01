@@ -97,13 +97,9 @@ export default function ProfilPage() {
             src={bgLinkedIn}
             alt="Background Image"
           />
-          <EditPP photo={profil} />
-          {/* <img
-            className="absolute translate-y-[-55%] translate-x-[20px]"
-            src={profil}
-            width={100}
-            alt="Profile Image"
-          /> */}
+          <EditPP
+            photo={profileData?.body.profile_photo ?? "/store" + profil}
+          />
         </div>
         {profileData?.body.isOwner && (
           <EditProfile

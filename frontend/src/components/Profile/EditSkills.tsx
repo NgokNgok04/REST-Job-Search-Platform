@@ -70,13 +70,9 @@ export default function EditSkills({ allData, data }: EditSkillsProps) {
   async function handleEditSkill(values: z.infer<typeof formSchema>) {
     try {
       const skillsDataArray = parseSkills(allData);
-      console.log(skillsDataArray);
       const idxData = findIndexSkills(skillsDataArray, data);
-      console.log(idxData);
       skillsDataArray[idxData] = values.skill;
-      console.log(skillsDataArray[idxData]);
       const result = skillsDataArray[idxData];
-      console.log(result);
       const profileData = {
         skills: result,
       };
@@ -86,6 +82,7 @@ export default function EditSkills({ allData, data }: EditSkillsProps) {
         console.log("SALAH bang");
       } else {
         console.log("BERHASIL BOS");
+        console.log(response.data.body);
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {

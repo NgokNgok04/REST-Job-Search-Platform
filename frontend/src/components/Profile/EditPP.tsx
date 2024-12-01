@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,45 +9,76 @@ import {
 } from "../ui/dialog";
 import deleteLogo from "/icons/delete.png";
 import cameraLogo from "/icons/camera.png";
-import client from "@/utils/axiosClient";
 import { useParams } from "react-router-dom";
+import axios from "axios";
+import clientFormData from "@/utils/axiosImage";
+import client from "@/utils/axiosClient";
+
 interface EditPPProps {
   photo: string;
 }
 export default function EditPP({ photo }: EditPPProps) {
-  const formRef = useRef<HTMLFormElement>(null);
   const [image, setImage] = useState<File | null>(null);
-  const [pp, setPP] = useState(photo);
-  const [previewUrl, setPreviewUrl] = useState(photo); // Handle client-side preview
   const [isOpen, setIsOpen] = useState(false);
   const { id } = useParams();
+
+  async function handleDelete() {
+    console.log("MASUK DELETES");
+    try {
+      const response = await client.put(`/profil/${id}`, {
+        profile_photo_path: image?.name,
+      });
+      if (response.status != 200) {
+        console.log("SALAH BANG");
+      } else {
+        setImage(null);
+      }
+      console.log("RESPONSE : ", response.data);
+      window.location.reload();
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error(err.response?.data?.message || "Failed to fetch profile");
+      } else if (err instanceof Error) {
+        console.error(err.message);
+      }
+    }
+  }
+
+  useEffect(() => {
+    try {
+      if (!image) {
+        console.log("tidak ada image");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("profile_photo_path", image);
+
+      console.log(image);
+      async function handleSubmit() {
+        const response = await clientFormData.put(`/profil/${id}`, formData);
+        if (response.status != 200) {
+          console.log("SALAH BANG");
+        } else {
+          console.log("BERHASIL BOS");
+        }
+        console.log("RESPONSE : ", response.data);
+      }
+      handleSubmit();
+      window.location.reload();
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error(err.response?.data?.message || "Failed to fetch profile");
+      } else if (err instanceof Error) {
+        console.error(err.message);
+      }
+    } finally {
+      console.log("BERHASIL");
+    }
+  }, [id, image]);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setImage(event.target.files[0]);
-      formRef.current?.submit();
-      setPreviewUrl(URL.createObjectURL(event.target.files[0]));
-    }
-  };
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!image) {
-      alert("Please select an image.");
-      console.log("g aada gambar");
-      return;
-    }
-    console.log("berhasil bos");
-
-    const formData = new FormData();
-    formData.append("image", image);
-    setPP(previewUrl);
-
-    try {
-      const response = await client.put(`/profil/${id}`, formData);
-      alert("Image uploaded successfully: " + response.data.path);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to upload image.");
     }
   };
   return (
@@ -55,8 +86,8 @@ export default function EditPP({ photo }: EditPPProps) {
       <DialogTrigger asChild>
         <button className="flex px-2 py-2 mt-1 mr-1 rounded-full">
           <img
-            className="absolute translate-y-[-55%] translate-x-[20px]"
-            src={pp}
+            className="absolute translate-y-[-55%] translate-x-[20px] border-4 border-[#FFFFFF]"
+            src={`${import.meta.env.VITE_API_URL}${photo}`}
             width={100}
             alt="Profile Image"
           />
@@ -68,32 +99,32 @@ export default function EditPP({ photo }: EditPPProps) {
           <DialogTitle>Photo Profile</DialogTitle>
         </DialogHeader>
         <div className="flex justify-center">
-          <img src={photo} width={150} alt="Profile Image" />
+          <img
+            src={`${import.meta.env.VITE_API_URL}${photo}`}
+            width={150}
+            alt="Profile Image"
+          />
         </div>
         <div className="flex flex-row justify-between">
-          <form
-            ref={formRef}
-            id="uploadForm"
-            onSubmit={handleSubmit}
-            className="flex flex-col items-center"
+          <button
+            type="button"
+            onClick={() => document.getElementById("fileInput")?.click()}
+            className="flex flex-col items-center hover:bg-[#44474B] px-2 py-2 rounded-lg"
           >
-            <button
-              type="button"
-              onClick={() => document.getElementById("fileInput")?.click()}
-              className="flex flex-col items-center hover:bg-[#44474B] px-2 py-2 rounded-lg"
-            >
-              <input
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <img src={cameraLogo} width={20} alt="Camera" />
-              Add Photo
-            </button>
-          </form>
-          <button className="flex flex-col items-center hover:bg-[#44474B] px-2 py-2 rounded-lg">
+            <input
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <img src={cameraLogo} width={20} alt="Camera" />
+            Add Photo
+          </button>
+          <button
+            onClick={() => handleDelete()}
+            className="flex flex-col items-center hover:bg-[#44474B] px-2 py-2 rounded-lg"
+          >
             <img src={deleteLogo} width={20} alt="Trash Button" />
             Delete
           </button>

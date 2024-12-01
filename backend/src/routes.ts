@@ -55,4 +55,7 @@ export const defineRoutes = (app: Express) => {
     //chat routes
     app.get("/api/chat/:userId", AuthMiddleware.authorization, ChatController.getChat);
     app.post("/api/chat/store/", AuthMiddleware.authorization, ChatController.storeChat);
+
+    // app.use("/store", express.static(path.join(__dirname, "../store")));
+
 };
