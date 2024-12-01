@@ -133,13 +133,15 @@ export const ConnectionController = {
 
     try {
       const request = await prisma.connectionRequest.findFirst({
-        where: { from_id: loggedUser, to_id: toIdBigInt },
+        where: { from_id: toIdBigInt, to_id: loggedUser },
       });
 
       if (!request) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Request not found.", error: null });
+        return res.status(404).json({
+          success: false,
+          message: "Request not found.",
+          error: null,
+        });
       }
 
       if (action === "accept") {
@@ -161,7 +163,7 @@ export const ConnectionController = {
 
           await tx.connectionRequest.delete({
             where: {
-              from_id_to_id: { from_id: loggedUser, to_id: toIdBigInt },
+              from_id_to_id: { from_id: toIdBigInt, to_id: loggedUser },
             },
           });
         });
@@ -254,19 +256,21 @@ export const ConnectionController = {
   },
 
   getConnections: async (req: Request, res: Response) => {
-    const { user_id } = req.query;
+    const { userId } = req.params; // Ambil userId dari route parameter
 
-    if (!user_id || typeof user_id !== "string" || isNaN(Number(user_id))) {
+    if (!userId || isNaN(Number(userId))) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or missing 'user_id' parameter",
+        message: "Invalid or missing 'userId' parameter",
+        error: null,
       });
     }
 
-    const userId = BigInt(user_id);
+    const userIdBigInt = BigInt(userId);
+
     try {
       const connections = await prisma.connection.findMany({
-        where: { from_id: userId },
+        where: { from_id: userIdBigInt },
         include: {
           To: {
             select: {

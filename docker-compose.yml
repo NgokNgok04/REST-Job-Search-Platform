@@ -15,6 +15,7 @@ services:
     volumes:
       - ./backend:/home/node/app
       - /home/node/app/node_modules
+      - ./backend/node_modules:/home/node/app/node_modules
     depends_on:
       - db
     command: npm run dev
@@ -41,6 +42,7 @@ services:
     volumes:
       - ./frontend:/home/node/app
       - /home/node/app/node_modules
+      - ./frontend/node_modules:/home/node/app/node_modules
     depends_on:
       - backend
     networks:

@@ -4,7 +4,7 @@ import { AuthController } from "./controllers/authController";
 import { ProfileController } from "./controllers/profileController";
 import { AuthMiddleware } from "./controllers/authMiddleware";
 import cookieParser from "cookie-parser";
-import { getUsers } from "./controllers/userController";
+import { UserController } from "./controllers/userController";
 import { ConnectionController } from "./controllers/connectionController";
 import upload from "./middleware/uploadImage";
 import path from "path";
@@ -24,10 +24,10 @@ app.use(cookieParser());
 
 app.use("/store", express.static(path.join(__dirname, "../store")));
 
+// Authentication and authorization
 app.post("/api/register", AuthController.signup);
 app.post("/api/login", AuthController.signin);
 app.get("/api/test", AuthMiddleware.authorization, AuthController.test);
-
 app.post("/api/logout", AuthController.logout);
 app.get(
   "/api/protected",
@@ -41,6 +41,7 @@ app.get(
   }
 );
 
+// Profiles
 app.get("/api/profil/:id", ProfileController.getProfile);
 app.put(
   "/api/profil/:id",
@@ -49,10 +50,13 @@ app.put(
 );
 app.get("/api/profil", ProfileController.getAllProfiles);
 
-app.get("/api/test", AuthMiddleware.authorization, AuthController.test);
-
 // User routes
-app.get("/api/users", getUsers);
+app.get("/api/users", AuthMiddleware.authorization, UserController.getUsers);
+app.get(
+  "/api/logged-id,",
+  AuthMiddleware.authorization,
+  UserController.getLoggedInUser
+);
 
 // Connection routes
 app.post(
@@ -70,10 +74,7 @@ app.post(
   AuthMiddleware.authorization,
   ConnectionController.respondToRequest
 );
-app.get(
-  "/api/connections/:userId",
-  ConnectionController.getConnections
-);
+app.get("/api/connections/:userId", ConnectionController.getConnections);
 app.delete(
   "/api/connections/unconnect",
   AuthMiddleware.authorization,

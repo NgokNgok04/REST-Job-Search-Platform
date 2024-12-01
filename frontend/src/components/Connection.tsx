@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
 interface Connection {
@@ -9,20 +10,32 @@ interface Connection {
 }
 
 const ConnectionsList: React.FC = () => {
+  const { userId } = useParams<{ userId: string }>();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch connections from API
   const fetchConnections = async () => {
+    if (!userId) {
+      setError("User ID is required.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const response = await axios.get<Connection[]>(
-        `http://localhost:3000/api/connections/:userId`
+      const response = await axios.get<{ success: boolean; body: Connection[] }>(
+        `http://localhost:3000/api/connections/${userId}`
       );
-      setConnections(response.data);
+
+      const { success, body } = response.data;
+
+      if (success) {
+        setConnections(body);
+      } else {
+        setError("Failed to fetch connections.");
+      }
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
         const { success, message } = err.response.data;

@@ -1,17 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { Input } from "./ui/input";
 
 interface User {
   id: string;
   username: string;
   email: string;
-  password_hash: string;
   full_name?: string | null;
-  work_history?: string | null;
-  skills?: string | null;
   profile_photo_path?: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 const debounce = (func: Function, delay: number) => {
@@ -22,32 +20,44 @@ const debounce = (func: Function, delay: number) => {
   };
 };
 
-
 const UsersList: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [sendingRequest, setSendingRequest] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/auth/status",
+          {
+            withCredentials: true,
+          }
+        );
+        setIsLoggedIn(response.data.success);
+      } catch {
+        setIsLoggedIn(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
-  const fetchUsers = async (query: string = ""): Promise<void> => {
+  const fetchUsers = async (query: string = "") => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await axios.get<User[]>(
-        "http://localhost:3000/api/users",
-        {
-          params: { search: query },
-        }
-      );
-      setUsers(response.data);
+      const response = await axios.get("http://localhost:3000/api/users", {
+        params: { search: query },
+      });
+      setUsers(response.data.body || []);
     } catch (err: any) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
-      } else {
-        setError("Failed to fetch users");
-      }
+      setError("Failed to fetch users. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -56,9 +66,8 @@ const UsersList: React.FC = () => {
   const debouncedFetchUsers = useCallback(debounce(fetchUsers, 300), []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearch(value);
-    debouncedFetchUsers(value);
+    setSearch(e.target.value);
+    debouncedFetchUsers(e.target.value);
   };
 
   const sendConnectionRequest = async (toId: string) => {
@@ -66,17 +75,14 @@ const UsersList: React.FC = () => {
     setError("");
 
     try {
-      await axios.post("http://localhost:3000/api/connections/request", {
-        to_id: toId,
-      });
-
+      await axios.post(
+        "http://localhost:3000/api/connections/request",
+        { to_id: toId },
+        { withCredentials: true }
+      );
       alert("Connection request sent successfully!");
-    } catch (err: any) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
-      } else {
-        setError("Failed to send connection request.");
-      }
+    } catch {
+      setError("Failed to send request. Please try again later.");
     } finally {
       setSendingRequest(null);
     }
@@ -89,18 +95,14 @@ const UsersList: React.FC = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h1>User List</h1>
-      <input
+      <Input
         type="text"
         placeholder="Search users..."
         value={search}
         onChange={handleSearchChange}
-        style={{
-          marginBottom: "20px",
-          padding: "10px",
-          fontSize: "16px",
-          width: "100%",
-        }}
+        className="w-full px-4 py-2 mb-4 text-base"
       />
+
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {!loading && !error && users.length === 0 && <p>No users found.</p>}
@@ -122,21 +124,27 @@ const UsersList: React.FC = () => {
             <p>
               <strong>Full Name:</strong> {user.full_name || "N/A"}
             </p>
-            <button
-              onClick={() => sendConnectionRequest(user.id)}
-              disabled={sendingRequest === user.id}
-              style={{
-                padding: "10px",
-                backgroundColor:
-                  sendingRequest === user.id ? "#ccc" : "#007BFF",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: sendingRequest === user.id ? "not-allowed" : "pointer",
-              }}
-            >
-              {sendingRequest === user.id ? "Sending..." : "Send Request"}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => sendConnectionRequest(user.id)}
+                  disabled={!isLoggedIn || sendingRequest === user.id}
+                  variant={isLoggedIn ? "default" : "outline"}
+                  className={isLoggedIn ? "" : "opacity-50 cursor-not-allowed"}
+                >
+                  {sendingRequest === user.id
+                    ? "Sending..."
+                    : isLoggedIn
+                    ? "Send Request"
+                    : "Login to Send Request"}
+                </Button>
+              </TooltipTrigger>
+              {!isLoggedIn && (
+                <TooltipContent>
+                  <p>You need to log in to send connection requests.</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </li>
         ))}
       </ul>

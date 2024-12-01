@@ -47,7 +47,7 @@ function App() {
           element={<ConnectionRequests/>}
         />
         <Route
-          path="/connections"
+          path="/connections/:userId"
           element={<ConnectionsList/>}
         />
         <Route

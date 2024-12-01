@@ -2,6 +2,8 @@ import { prisma } from "../prisma";
 import { sign } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { error } from "console";
+import { Request, Response } from "express";
 
 dotenv.config();
 

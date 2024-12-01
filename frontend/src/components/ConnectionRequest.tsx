@@ -3,6 +3,7 @@ import axios from "axios";
 
 interface ConnectionRequest {
   from_id: string;
+  to_id: string;
   full_name: string;
   email: string;
   created_at: string;
@@ -38,20 +39,18 @@ const ConnectionRequests: React.FC = () => {
     }
   };
 
-  const handleAction = async (fromId: string, action: "accept" | "reject") => {
-    setActionLoading(fromId);
+  const handleAction = async (toId: string, action: "accept" | "reject") => {
+    setActionLoading(toId);
     setError("");
 
     try {
       await axios.post(
         "http://localhost:3000/api/connections/respond",
-        { from_id: fromId, action },
+        { to_id: toId, action },
         { withCredentials: true }
       );
 
-      setRequests((prev) =>
-        prev.filter((request) => request.from_id !== fromId)
-      );
+      setRequests((prev) => prev.filter((request) => request.to_id !== toId));
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
         const { success, message } = err.response.data;
