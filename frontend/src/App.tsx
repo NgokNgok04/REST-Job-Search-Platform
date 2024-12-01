@@ -77,7 +77,7 @@ function App() {
           }
         />
         <Route
-          path="/chat" 
+          path="/chat/:id" 
           element = {
             <Layout>
               <Chat/>  

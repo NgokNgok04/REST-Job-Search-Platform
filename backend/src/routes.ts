@@ -52,5 +52,6 @@ export const defineRoutes = (app: Express) => {
     app.delete("/api/connections/unconnect", unconnectConnection);
     
     //chat routes
-    app.get("/api/chat", AuthMiddleware.authorization, ChatController.getChat);
+    app.get("/api/chat/:userId", AuthMiddleware.authorization, ChatController.getChat);
+    app.post("/api/chat/store/", AuthMiddleware.authorization, ChatController.storeChat);
 };
