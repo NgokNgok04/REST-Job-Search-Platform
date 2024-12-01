@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { set } from "react-hook-form";
 
 // Define a type for messages
 interface Message {
   userId: string;
+  userRecipiendId: string; 
   username: string;
   message: string;
 }
@@ -14,7 +16,9 @@ const Chat = () => {
     const [userId, setUserId] = useState<string>("");
     const socketRef = useRef<WebSocket | null>(null); 
 
-    // Fetch user data inside useEffect
+    const [recipientId, setRecipientId] = useState<string>("");
+
+    //hardocoded dulu 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -29,6 +33,8 @@ const Chat = () => {
                     }
                     if (data.body.id) {
                         setUserId(data.body.id);
+                        if(data.body.id === "1") setRecipientId("2");
+                        else setRecipientId("1");
                     }
                 } else {
                     console.warn("Invalid user data:", data);
@@ -49,31 +55,43 @@ const Chat = () => {
     
         newSocket.onopen = () => {
             console.log("WebSocket Client Connected");
+            const initialMessage = {
+                type: "user_id", 
+                userId: userId, 
+            };
+            newSocket.send(JSON.stringify(initialMessage));
         };
     
         newSocket.onmessage = (message) => {
             try {
                 const data = JSON.parse(message.data);
+                if(data.to == data.from){
+                    console.log("Message sent to self");
+                    return;
+                }
                 switch (data.type) {
                     case "message":
-                        if (data.message && data.username && data.id) {
+                        console.log(data.message);
+                        if (data.message && data.username && data.from && data.to) {
                             setMessages((prevMessages) => [
                                 ...prevMessages,
                                 {
                                     userId: data.id,
                                     username: data.username,
                                     message: data.message,
+                                    userRecipiendId: data.to,
                                 },
                             ]);
                         } else {
                             console.warn("Invalid 'message' format:", data);
                         }
                         break;
-    
+                        
+                    //testing 
                     case "welcome":
                         console.log("Welcome message received:", data);
                         if (data.username) {
-                            setUsername(data.username); // Correctly set username
+                            setUsername(data.username); 
                         }
                         break;
     
@@ -97,7 +115,7 @@ const Chat = () => {
             console.log("Cleaning up WebSocket connection...");
             newSocket.close();
         };
-    }, [username, userId]); // Depend on username and userId to wait for user data before opening socket
+    }, [username, userId]); 
     
 
     const onSend = () => {
@@ -106,6 +124,7 @@ const Chat = () => {
                 type: "message", 
                 message: myMessage.trim(),
                 username: username || "Guest",
+                recipientId: recipientId,
             };
     
             socketRef.current.send(JSON.stringify(payload));
@@ -127,9 +146,10 @@ const Chat = () => {
                             username === message.username ? "flex-end" : "flex-start"
                         }`}
                     >
-                        <section>{message.username[0].toUpperCase()}</section>
+                        {/* <section>{message.username[0].toUpperCase()}</section> */}
                         <h4>{message.username + ":"}</h4>
                         <p>{message.message}</p>
+                        <br></br>
                     </div>
                 ))}
             </div>

@@ -8,21 +8,32 @@ export function startWebSocketServer(port: number) {
     server.on("connection", (ws: WebSocket) => {
         console.log("New connection");
 
-        //ini ganti ke user sebenernya lmao
-        const userId = `user_${Math.random().toString(36).substring(7)}`;
-        clients.set(userId, ws);
-        ws.send(JSON.stringify({ type: "welcome", userId }));
+        let userId: string | null = null; 
 
+        //kalo type message
         ws.on("message", (data: string) => {
             try {
                 const message = JSON.parse(data);
-                console.log(`Received message from user ${userId}:`, message);
-                switch (message.type) {
-                    case "message":
-                        handleDirectMessage(userId, message);
-                        break;
-                    default:
-                        ws.send(JSON.stringify({ type: "error", message: "Unknown message type" }));
+                //kalo type user_id, buat pertama kali connect
+                if (message.type === "user_id" && message.userId) {
+                    userId = message.userId;
+                    if(userId){
+                        clients.set(userId, ws);
+                        ws.send(JSON.stringify({ type: "welcome", userId }));
+                        console.log(`Assigned userId ${userId} to the connection`);
+                    }
+                //kalo type message biasa
+                } else if (userId) {
+                    switch (message.type) {
+                        case "message":
+                            // console.log(`Received message from user ${userId}:`, message);
+                            handleDirectMessage(userId, message);
+                            break;
+                        default:
+                            ws.send(JSON.stringify({ type: "error", message: "Unknown message type" }));
+                    }
+                } else {
+                    ws.send(JSON.stringify({ type: "error", message: "userId is required" }));
                 }
             } catch (error) {
                 ws.send(JSON.stringify({ type: "error", message: "Invalid message format" }));
@@ -30,22 +41,30 @@ export function startWebSocketServer(port: number) {
         });
 
         ws.on("close", () => {
-            console.log(`Connection closed for user: ${userId}`);
-            clients.delete(userId);
+            if (userId) {
+                console.log(`Connection closed for user: ${userId}`);
+                clients.delete(userId);
+            }
+        });
+
+        ws.on("error", (error) => {
+            console.error(`WebSocket error for user ${userId}:`, error);
         });
     });
 }
 
-function handleDirectMessage(senderId: string, message: any) {
-    const { recipientId, text } = message;
-
+function handleDirectMessage(senderId: string, data: any) {
+    const { recipientId, message } = data;
     if (clients.has(recipientId)) {
         const recipientWs = clients.get(recipientId)!;
         recipientWs.send(JSON.stringify({
-            type: "direct_message",
+            type: "message",
+            username: data.username, 
+            message,
             from: senderId,
-            text,
+            to: recipientId,
         }));
+
     } else {
         const senderWs = clients.get(senderId)!;
         senderWs.send(JSON.stringify({
