@@ -1,5 +1,6 @@
 // import React from "react";
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 // import { Navigate } from "react-router-dom";
 // import { useNavigate } from "react-router-dom";
 
@@ -64,6 +65,8 @@ const LoginPage = () => {
         />
         <button onClick={handleLogin}>Login</button>
         {error && <p className="text-red-500 mt-2">{error}</p>}
+        {/* sementara, nanti jangan lupa hapus LOL  */}
+        {success && <Navigate to="/chat" />}
       </div>
     </div>
   );
