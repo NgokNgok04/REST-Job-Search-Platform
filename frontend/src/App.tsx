@@ -11,6 +11,7 @@ import ConnectionsList from "./components/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
+import FeedPage from "./Pages/Feeds";
 
 function App() {
   return (
@@ -40,16 +41,10 @@ function App() {
             </Layout>
           }
         />
-        {/* TODO: change loggedUser */}
-        <Route path="/users" element={<UsersList/>} />
-        <Route
-          path="/requests"
-          element={<ConnectionRequests/>}
-        />
-        <Route
-          path="/connections/:userId"
-          element={<ConnectionsList/>}
-        />
+
+        <Route path="/users" element={<UsersList />} />
+        <Route path="/requests" element={<ConnectionRequests />} />
+        <Route path="/connections/:userId" element={<ConnectionsList />} />
         <Route
           path="/profil/:id"
           element={
@@ -71,6 +66,15 @@ function App() {
           element={
             <Layout>
               <Skills />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/feeds"
+          element={
+            <Layout>
+              <FeedPage />
             </Layout>
           }
         />

@@ -1,7 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Button } from "./ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "./ui/tooltip";
 import { Input } from "./ui/input";
 
 interface User {
@@ -21,45 +26,39 @@ const debounce = (func: Function, delay: number) => {
 };
 
 const UsersList: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // Use null as initial state
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [sendingRequest, setSendingRequest] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/auth/status",
-          {
-            withCredentials: true,
-          }
+          "http://localhost:3000/api/protected",
+          { withCredentials: true }
         );
         setIsLoggedIn(response.data.success);
       } catch {
         setIsLoggedIn(false);
-      } finally {
-        setLoading(false);
       }
     };
     checkAuth();
   }, []);
 
   const fetchUsers = async (query: string = "") => {
-    setLoading(true);
-    setError("");
-
+    setError(""); // Clear any previous error
     try {
       const response = await axios.get("http://localhost:3000/api/users", {
         params: { search: query },
+        withCredentials: true,
       });
       setUsers(response.data.body || []);
-    } catch (err: any) {
-      setError("Failed to fetch users. Please try again later.");
-    } finally {
-      setLoading(false);
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch users.";
+      setError(errorMessage);
     }
   };
 
@@ -81,16 +80,29 @@ const UsersList: React.FC = () => {
         { withCredentials: true }
       );
       alert("Connection request sent successfully!");
-    } catch {
-      setError("Failed to send request. Please try again later.");
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to send request.";
+      setError(errorMessage);
     } finally {
       setSendingRequest(null);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (isLoggedIn) {
+      fetchUsers();
+    }
+  }, [isLoggedIn]);
+
+  if (isLoggedIn === null) {
+    // While checking the login status, you can render a loading message or redirect
+    return <p>Loading...</p>;
+  }
+
+  if (!isLoggedIn) {
+    return <p>You need to log in to view the users list.</p>;
+  }
 
   return (
     <div style={{ padding: "20px" }}>
@@ -103,9 +115,8 @@ const UsersList: React.FC = () => {
         className="w-full px-4 py-2 mb-4 text-base"
       />
 
-      {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && !error && users.length === 0 && <p>No users found.</p>}
+      {!error && users.length === 0 && <p>No users found.</p>}
       <ul style={{ listStyleType: "none", padding: 0 }}>
         {users.map((user) => (
           <li
@@ -124,27 +135,23 @@ const UsersList: React.FC = () => {
             <p>
               <strong>Full Name:</strong> {user.full_name || "N/A"}
             </p>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={() => sendConnectionRequest(user.id)}
-                  disabled={!isLoggedIn || sendingRequest === user.id}
-                  variant={isLoggedIn ? "default" : "outline"}
-                  className={isLoggedIn ? "" : "opacity-50 cursor-not-allowed"}
-                >
-                  {sendingRequest === user.id
-                    ? "Sending..."
-                    : isLoggedIn
-                    ? "Send Request"
-                    : "Login to Send Request"}
-                </Button>
-              </TooltipTrigger>
-              {!isLoggedIn && (
-                <TooltipContent>
-                  <p>You need to log in to send connection requests.</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => sendConnectionRequest(user.id)}
+                    variant="default"
+                  >
+                    Send Request
+                  </Button>
+                </TooltipTrigger>
+                {!isLoggedIn && (
+                  <TooltipContent>
+                    <p>You need to log in to send connection requests.</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </li>
         ))}
       </ul>

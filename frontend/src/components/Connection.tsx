@@ -25,9 +25,12 @@ const ConnectionsList: React.FC = () => {
     setError("");
 
     try {
-      const response = await axios.get<{ success: boolean; body: Connection[] }>(
-        `http://localhost:3000/api/connections/${userId}`
-      );
+      const response = await axios.get<{
+        success: boolean;
+        body: Connection[];
+      }>(`http://localhost:3000/api/connections/${userId}`, {
+        withCredentials: true,
+      });
 
       const { success, body } = response.data;
 
