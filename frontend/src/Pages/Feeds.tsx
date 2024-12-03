@@ -91,6 +91,14 @@ const FeedPage: React.FC = () => {
       {/* Open Create modal */}
       <Button
         onClick={() => {
+          fetchPosts();
+        }}
+      >
+        Fetch
+      </Button>
+
+      <Button
+        onClick={() => {
           setCreateOpen(true);
           fetchPosts();
         }}

@@ -75,6 +75,7 @@ export const defineRoutes = (app: Express) => {
   app.get("/api/protected", AuthMiddleware.authorization, (req, res) => {
     res.json({
       status: true,
+      success: true,
       message: "You have access to this protected route",
       user: req.user,
     });
