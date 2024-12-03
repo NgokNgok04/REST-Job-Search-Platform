@@ -35,7 +35,7 @@ app.get(
   AuthMiddleware.authorization,
   (req: Request, res: Response) => {
     res.json({
-      status: true,
+      success: true,
       message: "You have access to this protected route",
       user: req.user,
     });
@@ -75,7 +75,11 @@ app.post(
   AuthMiddleware.authorization,
   ConnectionController.respondToRequest
 );
-app.get("/api/connections/:userId", ConnectionController.getConnections);
+app.get(
+  "/api/connections/:userId",
+  AuthMiddleware.authorization,
+  ConnectionController.getConnections
+);
 app.delete(
   "/api/connections/unconnect",
   AuthMiddleware.authorization,

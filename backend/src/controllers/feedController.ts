@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
-import { error } from "console";
+
+const serializePost = (post: any) => {
+  return {
+    id: post.id.toString(),
+    content: post.content,
+    created_at: post.created_at.toISOString(),
+    updated_at: post.updated_at.toISOString(),
+    user_id: post.user_id.toString(),
+  };
+};
 
 export const FeedController = {
   getFeed: async (req: Request, res: Response) => {
@@ -17,7 +26,9 @@ export const FeedController = {
     try {
       const take = Number(limit) || 10;
       const cursorId =
-        cursor && typeof cursor === "string" ? BigInt(cursor) : undefined;
+        cursor && typeof cursor === "string" && cursor !== "null"
+          ? BigInt(cursor)
+          : undefined;
 
       const connections = await prisma.connection.findMany({
         where: { from_id: BigInt(userId) },
@@ -25,8 +36,6 @@ export const FeedController = {
       });
 
       const connectedUserIds = connections.map((conn) => conn.to_id);
-
-      // Postingan diri sendiri
       connectedUserIds.push(BigInt(userId));
 
       const posts = await prisma.feed.findMany({
@@ -41,7 +50,6 @@ export const FeedController = {
         }),
       });
 
-      // TODO:
       const hasNextPage = posts.length > take;
       if (hasNextPage) {
         posts.pop();
@@ -51,8 +59,10 @@ export const FeedController = {
         success: true,
         message: "Successfully fetch feed",
         body: {
-          posts,
-          nextCursor: hasNextPage ? posts[posts.length - 1].id : null,
+          posts: posts.map((post) => serializePost(post)),
+          nextCursor: hasNextPage
+            ? posts[posts.length - 1].id.toString()
+            : null,
         },
       });
     } catch (error) {
@@ -95,7 +105,11 @@ export const FeedController = {
       res.status(201).json({
         success: true,
         message: "Post created successfully",
-        data: post,
+        data: {
+          ...post,
+          id: post.id.toString(),
+          user_id: post.user_id.toString(),
+        },
       });
     } catch (error) {
       res.status(500).json({
@@ -109,7 +123,7 @@ export const FeedController = {
   updatePost: async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const { post_id } = req.params;
-    const { content } = req.body;
+    const { trimmed } = req.body;
 
     if (!userId) {
       return res.status(401).json({
@@ -119,10 +133,10 @@ export const FeedController = {
       });
     }
 
-    if (!content || content.length > 280) {
+    if (!trimmed || trimmed.length > 280) {
       return res.status(400).json({
         success: false,
-        message: "Content must not exceed 280 characters",
+        message: "trimmed must not exceed 280 characters",
         error: null,
       });
     }
@@ -140,7 +154,7 @@ export const FeedController = {
         });
       }
 
-      if (post.user_id !== userId) {
+      if (post.user_id !== BigInt(userId)) {
         return res.status(403).json({
           success: false,
           message: "You are not authorized to edit this post",
@@ -150,13 +164,13 @@ export const FeedController = {
 
       const updatedPost = await prisma.feed.update({
         where: { id: postIdBigInt },
-        data: { content },
+        data: { content: trimmed },
       });
 
       return res.status(200).json({
         success: false,
         message: "Post updated successfully",
-        body: updatedPost,
+        body: serializePost(updatedPost),
       });
     } catch (error) {
       return res.status(500).json({
@@ -192,7 +206,7 @@ export const FeedController = {
         });
       }
 
-      if (post.user_id !== userId) {
+      if (post.user_id !== BigInt(userId)) {
         return res.status(403).json({
           success: false,
           message: "You are not authorized to delete this post",
