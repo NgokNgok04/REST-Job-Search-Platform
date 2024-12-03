@@ -7,10 +7,10 @@ export const AuthMiddleware = {
   authorization: async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.authToken;
     if (!token) {
-      return res.status(401).json({ status: false, message: "Unauthorized" });
+      return res.status(401).json({ status: false, message: "Unauthorized: no token" });
     }
-
     try {
+
       if (!process.env.JWT_SECRET) {
         return res
           .status(500)
@@ -22,7 +22,7 @@ export const AuthMiddleware = {
       req.user = { id, email, username };
       next();
     } catch (err) {
-      return res.status(401).json({ status: false, message: "Unauthorized" });
+      return res.status(401).json({ status: false, message: "Unauthorized: unexpected error" });
     }
   },
   //   verifyToken: async (req, res, next) => {
