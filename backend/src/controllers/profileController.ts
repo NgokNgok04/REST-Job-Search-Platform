@@ -1,39 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import multer from "multer";
-import path from "path";
 import jwt from "jsonwebtoken";
+import responseAPI from "../utils/responseAPI";
+import User from "../models/User";
+import Connection from "../models/Connection";
 const prisma = new PrismaClient();
-
-const storage = multer.diskStorage({
-  destination: (cb: any) => {
-    cb(null, "../../store"); // Store files in 'uploads' directory
-  },
-  filename: (file: any, cb: any) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Give the file a unique name
-  },
-});
-
-// File filter to allow only specific types (jpg, jpeg, png)
-const fileFilter = (file: any, cb: any) => {
-  const allowedTypes = ["image/jpg", "image/jpeg", "image/png"];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true); // Accept file
-  } else {
-    cb(
-      new Error("Invalid file type. Only JPG, JPEG, and PNG are allowed."),
-      false
-    );
-  }
-};
-
-// Create multer instance
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB file size limit
-  },
-}).single("profile_photo_path");
 
 export const ProfileController = {
   getAllProfiles: async (req: any, res: any) => {
@@ -58,56 +28,37 @@ export const ProfileController = {
     }
   },
   getProfile: async (req: any, res: any) => {
+    if (isNaN(Number(req.params.id))) {
+      responseAPI(res, 200, false, "Please enter valid id");
+      return;
+    }
+
     try {
-      const user = await prisma.user.findUnique({
-        where: {
-          id: Number(req.params.id),
-        },
-      });
-
-      const connCount = await prisma.connection.count({
-        where: {
-          from_id: Number(req.params.id),
-        },
-      });
-
-      const posts = await prisma.feed.findMany({
-        where: {
-          user_id: Number(req.params.id),
-        },
-        take: 10,
-      });
-
-      const payLoadPosts = posts.map((post) => ({
-        id: post.id,
-        content: post.content,
-        created_at: post.created_at,
-        updated_at: post.updated_at,
-      }));
-
-      const isLogin = !!req.cookies.authToken;
+      const user = await User.getUser(req.params.id);
       if (!user) {
-        res.status(404).json({
-          status: false,
-          message: "User not found",
-          body: {},
-        });
+        responseAPI(res, 200, false, "User not found");
+        return;
       }
 
+      const connCount = await Connection.getTotalConnection(req.params.id);
+      const data = {
+        username: user.username,
+        name: user.full_name,
+        work_history: user.work_history,
+        isOwner: false,
+        skills: user.skills,
+        isConnected: false,
+        connection_count: connCount.toString(),
+        profile_photo: user.profile_photo_path,
+        relevant_posts: {},
+      };
+
+      const isLogin = !!req.cookies.authToken;
+
+      //publik
       if (!isLogin) {
-        //Publik
-        res.status(200).json({
-          status: true,
-          message: "Profile data get successfully",
-          body: {
-            username: user?.username,
-            name: user?.full_name,
-            work_history: user?.work_history,
-            skills: user?.skills,
-            connection_count: connCount.toString(),
-            profile_photo: user?.profile_photo_path,
-          },
-        });
+        responseAPI(res, 200, true, `Success get Profile from Public`, data);
+        return;
       }
 
       const decoded = jwt.verify(
@@ -115,105 +66,60 @@ export const ProfileController = {
         process.env.JWT_SECRET || ""
       );
       req.user = decoded;
-      const isConnected = !!(await prisma.connection.findUnique({
-        where: {
-          from_id_to_id: {
-            from_id: Number(req.user.id),
-            to_id: Number(req.params.id),
-          },
-        },
-      }));
 
+      const posts = await User.getPosts(req.params.id);
       if (req.user.id == req.params.id) {
         //Owner
-        res.status(200).json({
-          status: true,
-          message: "Profile data get successfully",
-          body: {
-            username: user?.username,
-            name: user?.full_name,
-            work_history: user?.work_history,
-            skills: user?.skills,
-            connection_count: connCount.toString(),
-            profile_photo: user?.profile_photo_path,
-            relevant_posts: payLoadPosts,
-          },
-        });
-      } else {
-        //lihat profil orang lain
-        res.status(200).json({
-          status: true,
-          message: "Profile data get successfully",
-          body: {
-            username: user?.username,
-            name: user?.full_name,
-            work_history: user?.work_history,
-            skills: user?.skills,
-            connection_count: connCount.toString(),
-            profile_photo: user?.profile_photo_path,
-            isConnected: isConnected,
-            relevant_posts: payLoadPosts,
-          },
-        });
+        data.isOwner = true;
+        data.relevant_posts = posts;
+        responseAPI(res, 200, true, "Success get Profile Owner", data);
+        return;
       }
-    } catch (error) {
-      res.status(500).json({
-        status: false,
-        message: "Internal Server Error",
-        body: {},
-      });
+
+      //profil orang
+      const isConnected = await User.isConnected(req.user.id, req.params.id);
+      data.isOwner = false;
+      data.isConnected = isConnected;
+      responseAPI(res, 200, true, "Success get Profile Another People", data);
+      return;
+    } catch (err: unknown) {
+      responseAPI(res, 500, false, "Internal Server Error", {});
     }
   },
   setProfile: async (req: any, res: any) => {
     try {
-      const { username, profile_photo_path, full_name, work_history, skills } =
+      const { username, full_name, profile_photo_path, work_history, skills } =
         req.body;
+      const file = req.file;
+
       if (username == "") {
-        res
-          .status(400)
-          .json({ status: false, message: "Username cant be empty" });
+        responseAPI(res, 200, true, "Username cant be empty");
         return;
       }
 
-      upload(req, res, async (err: any) => {
-        if (err instanceof multer.MulterError) {
-          res.status(400).json({ status: false, message: err.message });
-          return;
-        } else if (err) {
-          res.status(400).json({
-            status: false,
-            message: "Invalid file type. Only JPG, JPEG, and PNG are allowed.",
-          });
-          return;
-        }
+      const profileData = {
+        username: username,
+        full_name: full_name,
+        work_history: work_history,
+        profile_photo_path: profile_photo_path,
+        skills: skills,
+      } as {
+        username: string;
+        full_name: string;
+        work_history: string;
+        skills: string;
+        profile_photo_path: string;
+      };
+      if (file) {
+        profileData.profile_photo_path = `/store/${req.file.filename}`;
+      }
 
-        const profileData = {
-          username: username,
-          full_name: full_name,
-          work_history: work_history,
-          skills: skills,
-          profile_photo_path: "",
-        };
-
-        if (req.file) {
-          profileData.profile_photo_path = profile_photo_path.path;
-        }
-        await prisma.user.update({
-          where: {
-            id: Number(req.params.id),
-          },
-          data: profileData,
-        });
-
-        res.status(200).json({
-          status: true,
-          message: "Profile updated successfully",
-        });
-      });
+      User.setUser(req.params.id, profileData);
+      responseAPI(res, 200, true, "Profile updated successfuly");
+      return;
     } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, message: "Internal server error", body: null });
+      responseAPI(res, 500, false, "Internal Server Error");
+      return;
     }
   },
 };

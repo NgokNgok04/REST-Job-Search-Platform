@@ -2,6 +2,8 @@ import { prisma } from "../prisma";
 import { sign } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { error } from "console";
+import { Request, Response } from "express";
 
 dotenv.config();
 
@@ -147,6 +149,8 @@ export const AuthController = {
         {
           id: user.id.toString(),
           email: user.email,
+          username: user.username,
+          fullname: user.full_name,
           password: user.password_hash,
         },
         secret,
@@ -155,10 +159,10 @@ export const AuthController = {
 
       if (token) {
         res.cookie("authToken", token, {
-          httpOnly: true,
-          sameSite: "strict",
+          // httpOnly: true,
+          // sameSite: "strict",
           expires: new Date(Date.now() + 3600000),
-          secure: true,
+          // secure: true,
         });
 
         res.status(200).json({
@@ -213,12 +217,80 @@ export const AuthController = {
     }
   },
 
+
+  getUser: async (req: any, res: any) => {
+    try {
+      const user = req.user;
+      res.status(200).json({
+        status: true,
+        message: "User data fetched successfully",
+        body: user,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      res.status(500).json({
+        status: true,
+        message: errorMessage,
+        body: {
+          token: null,
+        },
+      });
+    }
+  },
+
+  getUserById: async (req: any, res: any) => {
+    try {
+      const userId = req.params.id;
+      const user = await prisma.user.findUnique({
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          full_name: true,
+        },
+        where: {
+          id: Number(userId),
+        },
+      });
+
+      if (!user) {
+        res.status(404).json({
+          status: false,
+          message: "User not found",
+          body: null,
+        });
+        return;
+      }
+
+      const payloadUser = {
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email,
+        full_name: user.full_name,
+      };
+
+      res.status(200).json({
+        status: true,
+        message: "User data fetched successfully",
+        body: payloadUser,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      res.status(500).json({
+        status: true,
+        message: errorMessage,
+        body: {
+          token: null,
+        },
+      });
+    }
+  },
   //debugging
   test: async (req: any, res: any) => {
     try {
       const users = await prisma.user.findMany();
 
-      const payloadUser = users.map((user) => ({
+      const payloadUser = users.map((user: any) => ({
         id: user.id.toString(),
         username: user.username,
         email: user.email,
@@ -227,7 +299,7 @@ export const AuthController = {
 
       res
         .status(200)
-        .json({ status: true, message: "Test success", body: payloadUser });
+        .json({ status: true, message: "Test success", body: req.user });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       res.status(500).json({

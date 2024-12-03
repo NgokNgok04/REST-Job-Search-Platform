@@ -8,6 +8,12 @@ import Layout from "./components/Layout";
 import UsersList from "./components/UsersList";
 import ConnectionRequests from "./components/ConnectionRequest";
 import ConnectionsList from "./components/Connection";
+import ProfilPage from "./Pages/Profile";
+import WorkHistory from "./components/Profile/WorkHistory";
+import Skills from "./components/Profile/Skills";
+import FeedPage from "./Pages/Feeds";
+import Chat from "./components/Chat";
+import Broh from "./components/Broh";
 
 function App() {
   return (
@@ -37,15 +43,58 @@ function App() {
             </Layout>
           }
         />
-        {/* TODO: change loggedUser */}
-        <Route path="/users" element={<UsersList loggedUser="1" />} />
+
+        <Route path="/users" element={<UsersList />} />
+        <Route path="/requests" element={<ConnectionRequests />} />
+        <Route path="/connections/:userId" element={<ConnectionsList />} />
         <Route
-          path="/requests"
-          element={<ConnectionRequests loggedUser="2" />}
+          path="/profil/:id"
+          element={
+            <Layout cn="">
+              <ProfilPage />
+            </Layout>
+          }
         />
         <Route
-          path="/connections"
-          element={<ConnectionsList loggedUser="2" />}
+          path="/profil/work-history/:id"
+          element={
+            <Layout>
+              <WorkHistory />
+            </Layout>
+          }
+        />
+        <Route
+          path="/profil/skills/:id"
+          element={
+            <Layout>
+              <Skills />
+            </Layout>
+          }
+        />
+        <Route
+          path="/chat/:id" 
+          element = {
+            <Layout>
+              <Chat/>  
+            </Layout>
+          }
+        />
+        <Route
+          path="/test"
+          element = {
+            <Layout>
+              <Broh/>
+            </Layout>
+          }
+          />
+
+        <Route
+          path="/feeds"
+          element={
+            <Layout>
+              <FeedPage />
+            </Layout>
+          }
         />
       </Routes>
     </Router>
