@@ -12,6 +12,8 @@ import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
+import Chat from "./components/Chat";
+import Broh from "./components/Broh";
 
 function App() {
   return (
@@ -69,6 +71,22 @@ function App() {
             </Layout>
           }
         />
+        <Route
+          path="/chat/:id" 
+          element = {
+            <Layout>
+              <Chat/>  
+            </Layout>
+          }
+        />
+        <Route
+          path="/test"
+          element = {
+            <Layout>
+              <Broh/>
+            </Layout>
+          }
+          />
 
         <Route
           path="/feeds"
