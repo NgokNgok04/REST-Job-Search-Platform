@@ -258,7 +258,6 @@ const Chat = () => {
     }, [messages]);
 
     if(userId){
-
         return (
             <>
                 {!recpUsername ? (
@@ -341,7 +340,7 @@ const Chat = () => {
                 )}
             </>
         );
-    } else{
+    } else{ //anda belum login bosque
         return (
         <div className="flex items-center justify-center min-h-screen bg-[#f3f6f9]">
             <div className="bg-white p-10 rounded-lg shadow-lg max-w-lg w-full text-center">

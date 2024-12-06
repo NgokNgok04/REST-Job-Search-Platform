@@ -3,7 +3,8 @@ import { sign } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { error } from "console";
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
+import responseAPI from "../utils/responseAPI";
 
 dotenv.config();
 
@@ -27,30 +28,24 @@ export const AuthController = {
   signup: async (req: any, res: any) => {
     const { username, email, name, password, confirmPassword } = req.body;
     if (!username || !email || !password || !name || !confirmPassword) {
-      res
-        .status(400)
-        .json({ status: false, message: "All fields are required" });
+      const message = "All fields are required";
+      responseAPI(res, 400, false, message);
       return;
     } else if (password !== confirmPassword) {
-      res
-        .status(400)
-        .json({ status: false, message: "Passwords do not match" });
+      const message = "Password and confirm password must be the same";
+      responseAPI(res, 400, false, message);
       return;
     } else if (!validateEmail(email)) {
-      res.status(400).json({ status: false, message: "Invalid email" });
+      const message = "Invalid email";
+      responseAPI(res, 400, false, message);
       return;
     } else if (password.length < 6) {
-      res.status(400).json({
-        status: false,
-        message: "Password must be at least 6 characters long",
-      });
+      const message = "Password must be at least 6 characters long";
+      responseAPI(res, 400, false, message);
       return;
     } else if (!passwordChecker(password)) {
-      res.status(400).json({
-        status: false,
-        message:
-          "Password must contain one uppercase letter, one number, and one special character",
-      });
+      const message = "Password must contain one uppercase letter, one number, and one special character";
+      responseAPI(res, 400, false, message);
       return;
     }
 
@@ -63,9 +58,8 @@ export const AuthController = {
       });
 
       if (isExistUser) {
-        res
-          .status(400)
-          .json({ status: false, message: "Email already exists" });
+        const message = "Email already exists";
+        responseAPI(res, 400, false, message);
         return;
       }
 
@@ -84,18 +78,16 @@ export const AuthController = {
         },
       });
       if (newUser) {
-        res
-          .status(201)
-          .json({ status: true, message: "User created successfully" });
+        const message = "User created successfully";
+        responseAPI(res, 201, true, message);
         return;
       } else {
-        res
-          .status(500)
-          .json({ status: false, message: "User failed to create" });
-        return;
+        const message = "User failed to create";
+        responseAPI(res, 500, false, message);
       }
     } catch (error) {
-      res.status(500).json({ status: false, message: "Internal server error" });
+      const message = "Internal server error";
+      responseAPI(res, 500, false, message);
       return;
     }
   },
@@ -103,13 +95,7 @@ export const AuthController = {
   signin: async (req: any, res: any) => {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({
-        status: false,
-        message: "All fields are required",
-        body: {
-          token: null,
-        },
-      });
+      responseAPI(res, 400, false, "All fields are required");
       return;
     }
 
@@ -121,24 +107,12 @@ export const AuthController = {
       });
 
       if (!user) {
-        res.status(400).json({
-          status: false,
-          message: "Email or Password is wrong",
-          body: {
-            token: null,
-          },
-        });
+        responseAPI(res, 400, false, "Email or Password is wrong", {token: null});
         return;
       }
       const isPasswordvalid = bcrypt.compareSync(password, user.password_hash);
       if (!isPasswordvalid) {
-        res.status(400).json({
-          status: false,
-          message: "Email or Password is wrong",
-          body: {
-            token: null,
-          },
-        });
+        responseAPI(res, 400, false, "Email or Password is wrong", {token: null});
         return;
       }
       if (!secret) {
@@ -165,54 +139,32 @@ export const AuthController = {
           // secure: true,
         });
 
-        res.status(200).json({
-          status: true,
-          message: "Login successful",
-          body: {
-            token: token,
-          },
-        });
+        responseAPI(res, 200, true, "Login successful", { token: token });
         return;
       } else {
-        res.status(500).json({
-          status: true,
-          message: "Can't login user at the moment",
-          body: {
-            token: null,
-          },
-        });
+        responseAPI(res, 500, false, "Can't login user at the moment", { token: null });
         return;
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      res.status(500).json({
-        status: true,
-        message: errorMessage,
-        body: {
-          token: null,
-        },
-      });
+      responseAPI(res, 500, false, errorMessage, { token: null });
       return;
     }
   },
 
+  
   logout: async (req: any, res: any) => {
     try {
       const token = req.cookies.authToken;
       if (!token) {
-        res
-          .status(400)
-          .json({ status: false, message: "You are not logged in" });
-        return;
+        responseAPI(res, 400, false, "You are not logged in");
       } else {
         res.clearCookie("authToken");
-        res.status(200).json({ status: true, message: "Logout success" });
+        responseAPI(res, 200, true, "Logout success");
         return;
       }
     } catch (err) {
-      res
-        .status(400)
-        .json({ status: false, message: "Your are not logged in" });
+      responseAPI(res, 500, false, "Internal server error");
       return;
     }
   },
@@ -221,20 +173,10 @@ export const AuthController = {
   getUser: async (req: any, res: any) => {
     try {
       const user = req.user;
-      res.status(200).json({
-        status: true,
-        message: "User data fetched successfully",
-        body: user,
-      });
+      responseAPI(res, 200, true, "User data fetched successfully", user);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      res.status(500).json({
-        status: true,
-        message: errorMessage,
-        body: {
-          token: null,
-        },
-      });
+      responseAPI(res, 500, false, errorMessage, { token: null });
     }
   },
 
@@ -254,11 +196,7 @@ export const AuthController = {
       });
 
       if (!user) {
-        res.status(404).json({
-          status: false,
-          message: "User not found",
-          body: null,
-        });
+        responseAPI(res, 404, false, "User not found", null);
         return;
       }
 
@@ -269,20 +207,10 @@ export const AuthController = {
         full_name: user.full_name,
       };
 
-      res.status(200).json({
-        status: true,
-        message: "User data fetched successfully",
-        body: payloadUser,
-      });
+      responseAPI(res, 200, true, "User data fetched successfully", payloadUser);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      res.status(500).json({
-        status: true,
-        message: errorMessage,
-        body: {
-          token: null,
-        },
-      });
+      responseAPI(res, 500, false, errorMessage, {token: null});
     }
   },
   //debugging
