@@ -25,6 +25,8 @@ export function startWebSocketServer(port: number) {
                 //kalo type message biasa
                 } else if (userId) {
                     switch (message.type) {
+                        case "typing": 
+                            handleTypingNotification(userId, message.recipientId);
                         case "message":
                             // console.log(`Received message from user ${userId}:`, message);
                             handleDirectMessage(userId, message);
@@ -51,6 +53,18 @@ export function startWebSocketServer(port: number) {
             console.error(`WebSocket error for user ${userId}:`, error);
         });
     });
+}
+
+function handleTypingNotification(senderId: string, recipientId: string) {
+    if (clients.has(recipientId)) {
+        const recipientWs = clients.get(recipientId)!;
+        const typingPayload = JSON.stringify({
+            type: "typing",
+            from: senderId,
+            to: recipientId,
+        });
+        recipientWs.send(typingPayload);
+    }
 }
 
 function handleDirectMessage(senderId: string, data: any){

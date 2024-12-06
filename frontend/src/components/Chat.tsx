@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { set } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
 // Define a type for messages
@@ -19,15 +18,18 @@ const Chat = () => {
     const [recpUsername, setRecpUsername] = useState<string>("");
     const [userId, setUserId] = useState<string>("");
     const socketRef = useRef<WebSocket | null>(null);
+    const [isTyping, setIsTyping] = useState<boolean>(false);  
+    const typingTimeoutRef = useRef<any>(null);
 
     const recipientId = id?.toString();  
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await fetch("http://localhost:3000/api/user", {
-                method: "GET",
-                credentials: "include",
+                    method: "GET",
+                    credentials: "include",
                 });
                 const data = await response.json();
                 if (response.ok && data.body) {
@@ -47,6 +49,10 @@ const Chat = () => {
 
         const fetchRecipientData = async () => {
             try {
+                if(recipientId == userId){
+                    console.warn("Cannot chat with yourself"); 
+                    return
+                }
                 const response = await fetch(`http://localhost:3000/api/user/${recipientId}`, {
                     method: "GET", 
                     headers: {
@@ -112,17 +118,16 @@ const Chat = () => {
 
     useEffect(() => {
         if (!username || !userId) return;
-
         const newSocket = new WebSocket("ws://127.0.0.1:8000");
         socketRef.current = newSocket;
 
         newSocket.onopen = () => {
-        console.log("WebSocket Client Connected");
-        const initialMessage = {
-            type: "user_id", 
-            userId: userId, 
-        };
-        newSocket.send(JSON.stringify(initialMessage));
+            console.log("WebSocket Client Connected");
+            const initialMessage = {
+                type: "user_id", 
+                userId: userId, 
+            };
+            newSocket.send(JSON.stringify(initialMessage));
         };
 
         newSocket.onmessage = (message) => {
@@ -145,15 +150,25 @@ const Chat = () => {
                                 },
                             ]);
                         }
+                        setIsTyping(false);
                     } else {
                         console.warn("Invalid 'message' format:", data);
                     }
                     break;
-
-                case "welcome":
-                    // console.log("Welcome message received:", data);
+                case "typing":
+                    if (data.from !== userId && data.to === userId) {
+                        setIsTyping(true);
+                        if (typingTimeoutRef.current) {
+                            clearTimeout(typingTimeoutRef.current);
+                        }
+                        typingTimeoutRef.current = setTimeout(() => {
+                            setIsTyping(false);
+                        }, 5000); 
+                    }
+                    break;
+                case "welcome": //lol ini buat tester
                     if (data.username) {
-                    setUsername(data.username); 
+                        setUsername(data.username); 
                     }
                     break;
 
@@ -181,6 +196,10 @@ const Chat = () => {
 
     const onSend = async () => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && myMessage.trim()) {
+            
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
             const payload = {
                 type: "message", 
                 message: myMessage.trim(),
@@ -190,6 +209,7 @@ const Chat = () => {
 
             socketRef.current.send(JSON.stringify(payload));
             setMyMessage(""); 
+            setIsTyping(false);
             const response =  await fetch(`http://localhost:3000/api/chat/store/`, {
                 method: "POST", 
                 headers: {
@@ -215,34 +235,108 @@ const Chat = () => {
 
     };
 
+    // ini buat kirim type-nya jadi typing ke socket receiver
+    const onTyping = () => {
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && myMessage.trim()) {
+            const typingPayload = {
+                type: "typing",
+                recipientId: recipientId,
+            };
+            socketRef.current.send(JSON.stringify(typingPayload));
+        }
+    };
+
+    //ini mastiin biar muncul typing indicatornya
+    useEffect(() => {
+        if (myMessage.trim()) {
+            onTyping();
+        } 
+    }, [myMessage]);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
     return (
         <>
-        <div className="title">Socket Chat: {username || "Guest"}</div>
-        <div className="messages">
-            {messages.map((message, key) => (
-            <div
-                key={key}
-                className={`message ${username === message.username ? "flex-end" : "flex-start"}`}
-            >
-                <section>{message.username[0].toUpperCase()}</section>
-                <h4>{message.username + ":"}</h4>
-                <p>{message.message}</p>
-                <p>{message.timestamp}</p>
-                <br></br>
-            </div>
-            ))}
-        </div>
+            {!recpUsername ? (
+                <div className="flex items-center justify-center h-screen bg-gray-100">
+                    <div className="text-center">
+                        <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
+                        <p className="text-gray-500 mt-2">
+                            Recipient username not found. Please select a valid user to chat with.
+                        </p>
+                    </div>
+                </div>
+            ) : recpUsername === username ? (
+                <div className="flex items-center justify-center h-screen bg-gray-100">
+                    <div className="text-center">
+                        <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
+                        <p className="text-gray-500 mt-2">
+                            You cannot chat with yourself. Please select another user to chat with.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="relative flex flex-col h-screen bg-gray-100">
+                    <div className="flex items-center justify-between px-6 py-4 bg-blue-600 text-white shadow">
+                        <h2 className="text-lg font-semibold">Chat with {recpUsername}</h2>
+                    </div>
 
-        <div className="bottom form">
-            <input
-            type="text"
-            value={myMessage}
-            onChange={(e) => setMyMessage(e.target.value)}
-            onKeyUp={(e) => e.key === "Enter" && onSend()}
-            placeholder="Type your message"
-            />
-            <button onClick={onSend}>Send</button>
-        </div>
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                        {messages.map((message, key) => (
+                            <div
+                                key={key}
+                                className={`flex ${
+                                    username === message.username
+                                        ? "justify-start"
+                                        : "justify-end"
+                                }`}
+                            >
+                                <div
+                                    className={`max-w-xs px-4 py-2 rounded-lg shadow ${
+                                        username === message.username
+                                            ? "bg-white text-gray-800"
+                                            : "bg-blue-500 text-white"
+                                    }`}
+                                >
+                                    <p className="text-sm">{message.message}</p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {new Date(message.timestamp).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                        {isTyping && recipientId !== userId && (
+                            // tau ah capek hardcoded aja ke kanan 
+                            <div className="flex justify-end mb-4"> 
+                                <div className="bg-blue-500 p-3 rounded-lg italic text-white">Typing...</div> 
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    <div className="flex items-center px-6 py-4 bg-gray-200">
+                        <input
+                            type="text"
+                            value={myMessage}
+                            onChange={(e) => setMyMessage(e.target.value)}
+                            onKeyUp={(e) => e.key === "Enter" && onSend()}
+                            placeholder="Type your message..."
+                            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                            onClick={onSend}
+                            className="ml-4 px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
