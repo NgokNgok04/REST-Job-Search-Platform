@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { set } from "react-hook-form";
 import { useParams } from "react-router-dom";
 
 // Define a type for messages
@@ -19,6 +18,8 @@ const Chat = () => {
     const [recpUsername, setRecpUsername] = useState<string>("");
     const [userId, setUserId] = useState<string>("");
     const socketRef = useRef<WebSocket | null>(null);
+    const [isTyping, setIsTyping] = useState<boolean>(false);  
+    const typingTimeoutRef = useRef<any>(null);
 
     const recipientId = id?.toString();  
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -117,17 +118,16 @@ const Chat = () => {
 
     useEffect(() => {
         if (!username || !userId) return;
-
         const newSocket = new WebSocket("ws://127.0.0.1:8000");
         socketRef.current = newSocket;
 
         newSocket.onopen = () => {
-        console.log("WebSocket Client Connected");
-        const initialMessage = {
-            type: "user_id", 
-            userId: userId, 
-        };
-        newSocket.send(JSON.stringify(initialMessage));
+            console.log("WebSocket Client Connected");
+            const initialMessage = {
+                type: "user_id", 
+                userId: userId, 
+            };
+            newSocket.send(JSON.stringify(initialMessage));
         };
 
         newSocket.onmessage = (message) => {
@@ -150,15 +150,25 @@ const Chat = () => {
                                 },
                             ]);
                         }
+                        setIsTyping(false);
                     } else {
                         console.warn("Invalid 'message' format:", data);
                     }
                     break;
-
-                case "welcome":
-                    // console.log("Welcome message received:", data);
+                case "typing":
+                    if (data.from !== userId && data.to === userId) {
+                        setIsTyping(true);
+                        if (typingTimeoutRef.current) {
+                            clearTimeout(typingTimeoutRef.current);
+                        }
+                        typingTimeoutRef.current = setTimeout(() => {
+                            setIsTyping(false);
+                        }, 5000); 
+                    }
+                    break;
+                case "welcome": //lol ini buat tester
                     if (data.username) {
-                    setUsername(data.username); 
+                        setUsername(data.username); 
                     }
                     break;
 
@@ -186,6 +196,10 @@ const Chat = () => {
 
     const onSend = async () => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && myMessage.trim()) {
+            
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
             const payload = {
                 type: "message", 
                 message: myMessage.trim(),
@@ -195,6 +209,7 @@ const Chat = () => {
 
             socketRef.current.send(JSON.stringify(payload));
             setMyMessage(""); 
+            setIsTyping(false);
             const response =  await fetch(`http://localhost:3000/api/chat/store/`, {
                 method: "POST", 
                 headers: {
@@ -219,6 +234,24 @@ const Chat = () => {
         }
 
     };
+
+    // ini buat kirim type-nya jadi typing ke socket receiver
+    const onTyping = () => {
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && myMessage.trim()) {
+            const typingPayload = {
+                type: "typing",
+                recipientId: recipientId,
+            };
+            socketRef.current.send(JSON.stringify(typingPayload));
+        }
+    };
+
+    //ini mastiin biar muncul typing indicatornya
+    useEffect(() => {
+        if (myMessage.trim()) {
+            onTyping();
+        } 
+    }, [myMessage]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -245,7 +278,7 @@ const Chat = () => {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col h-screen bg-gray-100">
+                <div className="relative flex flex-col h-screen bg-gray-100">
                     <div className="flex items-center justify-between px-6 py-4 bg-blue-600 text-white shadow">
                         <h2 className="text-lg font-semibold">Chat with {recpUsername}</h2>
                     </div>
@@ -277,6 +310,12 @@ const Chat = () => {
                                 </div>
                             </div>
                         ))}
+                        {isTyping && recipientId !== userId && (
+                            // tau ah capek hardcoded aja ke kanan 
+                            <div className="flex justify-end mb-4"> 
+                                <div className="bg-blue-500 p-3 rounded-lg italic text-white">Typing...</div> 
+                            </div>
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
 
