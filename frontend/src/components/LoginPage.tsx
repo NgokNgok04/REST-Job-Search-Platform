@@ -40,34 +40,41 @@ const LoginPage = () => {
       }
     }
   };
-  if (success) {
-    console.log("MASUKKK PAK EKOO");
-  } else {
-    console.log("BELUM MASUK");
-  }
+  // if (success) {
+  //   console.log("MASUKKK PAK EKOO");
+  // } else {
+  //   console.log("BELUM MASUK");
+  // }
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="flex flex-col p-6 border rounded shadow-lg">
-        <h2 className="mb-4 text-2xl">Login</h2>
+      <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">Sign In</h2>
         <input
           type="email"
           placeholder="mail@gmail.com"
-          className="p-2 mb-2 border rounded-sm"
+          className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
-          placeholder="password"
-          className="p-2 mb-2 border rounded-sm"
+          placeholder="Password"
+          className="p-3 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button onClick={handleLogin}>Login</button>
-        {error && <p className="mt-2 text-red-500">{error}</p>}
-        {error && <p className="mt-2 text-red-500">{error}</p>}
-        {/* sementara, nanti jangan lupa hapus LOL  */}
-        {success && <Navigate to="/chat" />}
+
+        <button
+          onClick={handleLogin}
+          className="w-full p-3 bg-[#0073b1] text-white font-semibold rounded-md shadow-md hover:bg-[#005c8c] transition duration-200"
+        >
+          Login
+        </button>
+        {error && (<p className="mt-4 text-red-500 text-center">{error}</p>)}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">Don't have an account?</p>
+          <a href="/register" className="text-sm text-[#0073b1] hover:text-[#005c8c]">Join now</a>
+        </div>
       </div>
     </div>
   );
