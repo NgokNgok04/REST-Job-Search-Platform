@@ -257,88 +257,111 @@ const Chat = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    return (
-        <>
-            {!recpUsername ? (
-                <div className="flex items-center justify-center h-screen bg-gray-100">
-                    <div className="text-center">
-                        <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
-                        <p className="text-gray-500 mt-2">
-                            Recipient username not found. Please select a valid user to chat with.
-                        </p>
-                    </div>
-                </div>
-            ) : recpUsername === username ? (
-                <div className="flex items-center justify-center h-screen bg-gray-100">
-                    <div className="text-center">
-                        <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
-                        <p className="text-gray-500 mt-2">
-                            You cannot chat with yourself. Please select another user to chat with.
-                        </p>
-                    </div>
-                </div>
-            ) : (
-                <div className="relative flex flex-col h-screen bg-gray-100">
-                    <div className="flex items-center justify-between px-6 py-4 bg-blue-600 text-white shadow">
-                        <h2 className="text-lg font-semibold">Chat with {recpUsername}</h2>
-                    </div>
+    if(userId){
 
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                        {messages.map((message, key) => (
-                            <div
-                                key={key}
-                                className={`flex ${
-                                    username === message.username
-                                        ? "justify-start"
-                                        : "justify-end"
-                                }`}
-                            >
+        return (
+            <>
+                {!recpUsername ? (
+                    <div className="flex items-center justify-center h-screen bg-gray-100">
+                        <div className="text-center">
+                            <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
+                            <p className="text-gray-500 mt-2">
+                                Recipient username not found. Please select a valid user to chat with.
+                            </p>
+                        </div>
+                    </div>
+                ) : recpUsername === username ? (
+                    <div className="flex items-center justify-center h-screen bg-gray-100">
+                        <div className="text-center">
+                            <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
+                            <p className="text-gray-500 mt-2">
+                                You cannot chat with yourself. Please select another user to chat with.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="relative flex flex-col h-screen bg-gray-100">
+                        <div className="flex items-center justify-between px-6 py-4 bg-blue-600 text-white shadow">
+                            <h2 className="text-lg font-semibold">Chat with {recpUsername}</h2>
+                        </div>
+    
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            {messages.map((message, key) => (
                                 <div
-                                    className={`max-w-xs px-4 py-2 rounded-lg shadow ${
+                                    key={key}
+                                    className={`flex ${
                                         username === message.username
-                                            ? "bg-white text-gray-800"
-                                            : "bg-blue-500 text-white"
+                                            ? "justify-start"
+                                            : "justify-end"
                                     }`}
                                 >
-                                    <p className="text-sm">{message.message}</p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {new Date(message.timestamp).toLocaleTimeString([], {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })}
-                                    </p>
+                                    <div
+                                        className={`max-w-xs px-4 py-2 rounded-lg shadow ${
+                                            username === message.username
+                                                ? "bg-white text-gray-800"
+                                                : "bg-blue-500 text-white"
+                                        }`}
+                                    >
+                                        <p className="text-sm">{message.message}</p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {new Date(message.timestamp).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {isTyping && recipientId !== userId && (
-                            // tau ah capek hardcoded aja ke kanan 
-                            <div className="flex justify-end mb-4"> 
-                                <div className="bg-blue-500 p-3 rounded-lg italic text-white">Typing...</div> 
-                            </div>
-                        )}
-                        <div ref={messagesEndRef} />
+                            ))}
+                            {isTyping && recipientId !== userId && (
+                                // tau ah capek hardcoded aja ke kanan 
+                                <div className="flex justify-end mb-4"> 
+                                    <div className="bg-gray-500 p-3 rounded-lg italic text-white">Typing...</div> 
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+    
+                        <div className="flex items-center px-6 py-4 bg-gray-200">
+                            <input
+                                type="text"
+                                value={myMessage}
+                                onChange={(e) => setMyMessage(e.target.value)}
+                                onKeyUp={(e) => e.key === "Enter" && onSend()}
+                                placeholder="Type your message..."
+                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <button
+                                onClick={onSend}
+                                className="ml-4 px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                            >
+                                Send
+                            </button>
+                        </div>
                     </div>
-
-                    <div className="flex items-center px-6 py-4 bg-gray-200">
-                        <input
-                            type="text"
-                            value={myMessage}
-                            onChange={(e) => setMyMessage(e.target.value)}
-                            onKeyUp={(e) => e.key === "Enter" && onSend()}
-                            placeholder="Type your message..."
-                            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <button
-                            onClick={onSend}
-                            className="ml-4 px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-                        >
-                            Send
-                        </button>
-                    </div>
+                )}
+            </>
+        );
+    } else{
+        return (
+        <div className="flex items-center justify-center min-h-screen bg-[#f3f6f9]">
+            <div className="bg-white p-10 rounded-lg shadow-lg max-w-lg w-full text-center">
+                <h3 className="text-3xl font-semibold text-[#0073b1] mb-6">You can't chat right now</h3>
+                <p className="text-lg text-gray-600 mb-6">
+                    It seems you are not logged in. Please log in to continue and explore.
+                </p>
+                <div className="mt-8">
+                    <a
+                        href="/login"
+                        className="inline-block w-full px-6 py-3 bg-[#0073b1] text-white font-semibold rounded-lg shadow-lg hover:bg-[#005c8c] transition duration-200"
+                    >
+                        Go to Login
+                    </a>
                 </div>
-            )}
-        </>
-    );
+            </div>
+        </div>
+        );
+    }
+
 };
 
 export default Chat;
