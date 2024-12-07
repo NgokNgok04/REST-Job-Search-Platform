@@ -448,4 +448,10 @@ export const defineRoutes = (app: Express) => {
     AuthMiddleware.authorization,
     ChatController.storeChat
   );
+
+  app.get(
+    "/api/chat/connection/:userId",
+    AuthMiddleware.authorization,
+    ChatController.isConnected
+  )
 };
