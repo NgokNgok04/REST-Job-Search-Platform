@@ -448,6 +448,12 @@ export const defineRoutes = (app: Express) => {
     ChatController.storeChat
   );
 
+  app.get(
+    "/api/chat/connection/:userId",
+    AuthMiddleware.authorization,
+    ChatController.isConnected
+  )
+  
   app.get("/api/allnotif", notifController.getNotif);
   app.post("/api/subscribe", notifController.subscribe);
   app.post("/api/send", notifController.sendNotification);

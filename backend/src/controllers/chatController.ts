@@ -89,4 +89,34 @@ export const ChatController = {
     }
 
   },
+
+  isConnected: async (req: Request, res: Response) => {
+    const fromId = req.user.id;
+    const userId = Number(req.params.userId);
+
+    try{
+      const exists = await prisma.connection.count({
+        where: {
+          to_id: userId,
+          from_id: fromId,
+        },
+      });
+
+      const existsReverse = await prisma.connection.count({
+        where: {
+          to_id: fromId,
+          from_id: userId,
+        },
+      });
+
+      if(exists + existsReverse > 0){
+        responseAPI(res, 200, true, "User connected", {connected: true});
+      }
+      else{
+        responseAPI(res, 404, false, "User not connected", {connected: false});
+      }
+    } catch(err){
+      responseAPI(res, 500, false, "Internal Server Error", null);
+    }
+  }
 };

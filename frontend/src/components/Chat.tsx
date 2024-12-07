@@ -52,7 +52,7 @@ const Chat = () => {
         const fetchConnections = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:3000/api/connections/${recipientId}`,
+                    `http://localhost:3000/api/chat/connection/${recipientId}`,
                     {
                         method: "GET",
                         headers: { "Content-Type": "application/json" },
@@ -62,7 +62,12 @@ const Chat = () => {
     
                 if (response.ok) {
                     const data = await response.json();
-                    setIsConnected(data.body?.length > 0);
+                    console.log("connection: ", data.body);
+                    if(data.body.connected){
+                        setIsConnected(true);
+                    }else{
+                        setIsConnected(false);
+                    }
                 } else {
                     setIsConnected(false);
                 }
@@ -187,7 +192,8 @@ const Chat = () => {
                         }
                         break;
                     case "typing":
-                        if (data.from !== userId && data.to === userId) {
+                        if ((data.from === userId && data.to === recipientId) || 
+                                (data.from === recipientId && data.to === userId)) {
                             setIsTyping(true);
                             if (typingTimeoutRef.current) {
                                 clearTimeout(typingTimeoutRef.current);
@@ -306,6 +312,7 @@ const Chat = () => {
                 </>
             )
         }
+
         if(!isConnected){
             return (
                 <>
