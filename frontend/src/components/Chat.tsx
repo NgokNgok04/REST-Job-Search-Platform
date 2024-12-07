@@ -73,7 +73,6 @@ const Chat = () => {
         };
         const fetchRecipientData = async () => {
             try {
-                if(!isConnected) return
                 console.log("MASUK SINI WOEY");
                 if(recipientId == userId){
                     console.warn("Cannot chat with yourself"); 
@@ -293,6 +292,20 @@ const Chat = () => {
 
 
     if(userId){
+        if (!recpUsername){
+            return (
+                <>
+                <div className="flex items-center justify-center h-screen bg-gray-100">
+                    <div className="text-center">
+                        <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
+                        <p className="text-gray-500 mt-2">
+                            Recipient username not found. Please select a valid user to chat with.
+                        </p>
+                    </div>
+                </div>
+                </>
+            )
+        }
         if(!isConnected){
             return (
                 <>
@@ -307,22 +320,7 @@ const Chat = () => {
                 </>
             )
         }
-
-        // else if (!recpUsername){
-        //     return (
-        //         <>
-        //         <div className="flex items-center justify-center h-screen bg-gray-100">
-        //             <div className="text-center">
-        //                 <h3 className="text-xl font-semibold text-gray-700">Cannot Start Chat</h3>
-        //                 <p className="text-gray-500 mt-2">
-        //                     Recipient username not found. Please select a valid user to chat with.
-        //                 </p>
-        //             </div>
-        //         </div>
-        //         </>
-        //     )
-
-        // }
+        
 
         else if(recpUsername === username){
             return (
