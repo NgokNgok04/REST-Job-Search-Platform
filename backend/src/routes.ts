@@ -51,6 +51,7 @@ export const defineRoutes = (app: Express) => {
 
   // Feed routes
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
+  app.get("/api/feed/:post_id", AuthMiddleware.authorization, FeedController.getPostById);
   app.post(
     "/api/feed",
     AuthMiddleware.authorization,
