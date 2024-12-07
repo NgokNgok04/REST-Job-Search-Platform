@@ -8,6 +8,7 @@ import { ConnectionController } from "./controllers/connectionController";
 import { ChatController } from "./controllers/chatController";
 import { FeedController } from "./controllers/feedController";
 import { Request, Response } from "express";
+import { notifController } from "./controllers/notifController";
 
 export const defineRoutes = (app: Express) => {
   app.get("/api", (req, res) => {
@@ -92,7 +93,6 @@ export const defineRoutes = (app: Express) => {
   app.put("/api/profil/:id", ProfileController.setProfile);
   app.get("/api/profil", ProfileController.getAllProfiles);
 
-
   //chat routes
   app.get(
     "/api/chat/:userId",
@@ -104,6 +104,10 @@ export const defineRoutes = (app: Express) => {
     AuthMiddleware.authorization,
     ChatController.storeChat
   );
+
+  app.get("/api/allnotif", notifController.getNotif);
+  app.post("/api/subscribe", notifController.subscribe);
+  app.post("/api/send", notifController.sendNotification);
 
   // app.use("/store", express.static(path.join(__dirname, "../store")));
 };
