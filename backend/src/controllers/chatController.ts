@@ -4,16 +4,34 @@ import responseAPI from "../utils/responseAPI";
 
 export const ChatController = {
   getChat: async (req: Request, res: Response) => {
-    const fromId = req.user.id;
-    const userId = Number(req.params.userId);
+    const fromId = req.user.id; //yang ngechat
+    const userId = Number(req.params.userId); //yang dichat
 
     try{
+      const exists = await prisma.connection.count({
+        where: {
+          to_id: userId,
+          from_id: fromId,
+        },
+      });
+
+      const existsReverse = await prisma.connection.count({
+        where: {
+          to_id: fromId,
+          from_id: userId,
+        },
+      });
+
+      if(exists + existsReverse == 0){
+        responseAPI(res, 404, false, "User not connected", {connected: false});
+        return;
+      }
 
       let chat = await prisma.chat.findMany({
-          where: {
-              from_id: fromId,
-              to_id: userId,
-          },
+        where: {
+            from_id: fromId,
+            to_id: userId,
+        },
       });
       const reverseChat = await prisma.chat.findMany({
           where: {
@@ -64,10 +82,10 @@ export const ChatController = {
 
     
     if(chatData){
-      responseAPI(res, 200, true, "Chat stored", chatData);
+      responseAPI(res, 200, true, "Chat stored");
     }
     else{
-      responseAPI(res, 500, false, "Failed to store chat", null);
+      responseAPI(res, 500, false, "Failed to store chat");
     }
 
   },
