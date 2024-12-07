@@ -8,10 +8,11 @@ import { ConnectionController } from "./controllers/connectionController";
 import { ChatController } from "./controllers/chatController";
 import { FeedController } from "./controllers/feedController";
 import { Request, Response } from "express";
+import { notifController } from "./controllers/notifController";
 
 export const defineRoutes = (app: Express) => {
   /**
-   * @swagger 
+   * @swagger
    * /api:
    *   get:
    *     tags:
@@ -52,7 +53,6 @@ export const defineRoutes = (app: Express) => {
     AuthMiddleware.authorization,
     UserController.getLoggedInUser
   );
-
 
   app.post(
     "/api/connections/request",
@@ -210,7 +210,7 @@ export const defineRoutes = (app: Express) => {
   app.post("/api/login", AuthController.signin);
 
   /**
-   * 
+   *
    * @swagger
    * /api/logout:
    *   post:
@@ -270,7 +270,6 @@ export const defineRoutes = (app: Express) => {
   app.get("/api/profil/:id", ProfileController.getProfile);
   app.put("/api/profil/:id", ProfileController.setProfile);
   app.get("/api/profil", ProfileController.getAllProfiles);
-
 
   /**
    * CHAT ROUTES
@@ -448,4 +447,10 @@ export const defineRoutes = (app: Express) => {
     AuthMiddleware.authorization,
     ChatController.storeChat
   );
+
+  app.get("/api/allnotif", notifController.getNotif);
+  app.post("/api/subscribe", notifController.subscribe);
+  app.post("/api/send", notifController.sendNotification);
+
+  // app.use("/store", express.static(path.join(__dirname, "../store")));
 };
