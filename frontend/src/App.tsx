@@ -5,7 +5,7 @@ import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
-import UsersList from "./components/UsersList";
+import UsersList from "./Pages/UsersList";
 import ConnectionRequests from "./components/ConnectionRequest";
 import ConnectionsList from "./components/Connection";
 import ProfilPage from "./Pages/Profile";
@@ -44,7 +44,15 @@ function App() {
           }
         />
 
-        <Route path="/users" element={<UsersList />} />
+        <Route
+          path="/users"
+          element={
+            <Layout>
+              <UsersList />
+            </Layout>
+          }
+        />
+        
         <Route path="/requests" element={<ConnectionRequests />} />
         <Route path="/connections/:userId" element={<ConnectionsList />} />
         <Route
@@ -72,21 +80,21 @@ function App() {
           }
         />
         <Route
-          path="/chat/:id" 
-          element = {
+          path="/chat/:id"
+          element={
             <Layout>
-              <Chat/>  
+              <Chat />
             </Layout>
           }
         />
         <Route
           path="/test"
-          element = {
+          element={
             <Layout>
-              <Broh/>
+              <Broh />
             </Layout>
           }
-          />
+        />
 
         <Route
           path="/feeds"

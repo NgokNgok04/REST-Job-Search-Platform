@@ -1,13 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "./ui/tooltip";
-import { Input } from "./ui/input";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { useToast } from "../components/hooks/use-toast";
 
 interface User {
   id: string;
@@ -26,10 +21,10 @@ const debounce = (func: Function, delay: number) => {
 };
 
 const UsersList: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); 
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const toast = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -47,17 +42,19 @@ const UsersList: React.FC = () => {
   }, []);
 
   const fetchUsers = async (query: string = "") => {
-    setError(""); 
     try {
       const response = await axios.get("http://localhost:3000/api/users", {
         params: { search: query },
-        withCredentials: true,
       });
       setUsers(response.data.body || []);
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || "Failed to fetch users.";
-      setError(errorMessage);
+      toast.toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: errorMessage,
+      });
     }
   };
 
@@ -69,39 +66,33 @@ const UsersList: React.FC = () => {
   };
 
   const sendConnectionRequest = async (toId: string) => {
-    setError("");
-
     try {
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:3000/api/connections/request",
         { to_id: toId },
         { withCredentials: true }
       );
-      alert("Connection request sent successfully!");
+      toast.toast({
+        title: "Request Success",
+        description: response.data.message,
+      });
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || "Failed to send request.";
-      setError(errorMessage);
-    } 
+      toast.toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: errorMessage,
+      });
+    }
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetchUsers();
-    }
-  }, [isLoggedIn]);
-
-  if (isLoggedIn === null) {
-    return <p>Loading...</p>;
-  }
-
-  if (!isLoggedIn) {
-    return <p>You need to log in to view the users list.</p>;
-  }
+    fetchUsers();
+  }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>User List</h1>
+    <div>
       <Input
         type="text"
         placeholder="Search users..."
@@ -110,8 +101,7 @@ const UsersList: React.FC = () => {
         className="w-full px-4 py-2 mb-4 text-base"
       />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!error && users.length === 0 && <p>No users found.</p>}
+      {users.length === 0 && <p>No users found.</p>}
       <ul style={{ listStyleType: "none", padding: 0 }}>
         {users.map((user) => (
           <li
@@ -130,23 +120,12 @@ const UsersList: React.FC = () => {
             <p>
               <strong>Full Name:</strong> {user.full_name || "N/A"}
             </p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => sendConnectionRequest(user.id)}
-                    variant="default"
-                  >
-                    Send Request
-                  </Button>
-                </TooltipTrigger>
-                {!isLoggedIn && (
-                  <TooltipContent>
-                    <p>You need to log in to send connection requests.</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              onClick={() => sendConnectionRequest(user.id)}
+              variant="default"
+            >
+              Send Request
+            </Button>
           </li>
         ))}
       </ul>

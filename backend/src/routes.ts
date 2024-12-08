@@ -15,7 +15,7 @@ export const defineRoutes = (app: Express) => {
   });
 
   // User routes
-  app.get("/api/users", AuthMiddleware.authorization, UserController.getUsers);
+  app.get("/api/users", UserController.getUsers);
   app.get(
     "/api/logged-id,",
     AuthMiddleware.authorization,
@@ -38,11 +38,7 @@ export const defineRoutes = (app: Express) => {
     AuthMiddleware.authorization,
     ConnectionController.respondToRequest
   );
-  app.get(
-    "/api/connections/:userId",
-    AuthMiddleware.authorization,
-    ConnectionController.getConnections
-  );
+  app.get("/api/connections/:userId", ConnectionController.getConnections);
   app.delete(
     "/api/connections/unconnect",
     AuthMiddleware.authorization,
@@ -51,7 +47,11 @@ export const defineRoutes = (app: Express) => {
 
   // Feed routes
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
-  app.get("/api/feed/:post_id", AuthMiddleware.authorization, FeedController.getPostById);
+  app.get(
+    "/api/feed/:post_id",
+    AuthMiddleware.authorization,
+    FeedController.getPostById
+  );
   app.post(
     "/api/feed",
     AuthMiddleware.authorization,
@@ -92,7 +92,6 @@ export const defineRoutes = (app: Express) => {
   app.get("/api/profil/:id", ProfileController.getProfile);
   app.put("/api/profil/:id", ProfileController.setProfile);
   app.get("/api/profil", ProfileController.getAllProfiles);
-
 
   //chat routes
   app.get(
