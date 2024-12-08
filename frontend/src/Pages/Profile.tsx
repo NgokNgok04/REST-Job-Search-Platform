@@ -9,7 +9,6 @@ import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
 import EditPP from "@/components/Profile/EditPP";
 import { enableNotifications } from "@/utils/notifications";
-// import requestNotificationPermission from "@/utils/notifPermission";
 
 type ProfileResponse = {
   status: boolean;

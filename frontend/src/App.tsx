@@ -1,8 +1,13 @@
 // import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import "./App.css";
 import LoginPage from "./Pages/LoginPage";
-import RegisterPage from "./components/RegisterPage";
+import RegisterPage from "./Pages/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
 import UsersList from "./components/UsersList";
@@ -14,33 +19,10 @@ import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
-import ChatRooms from "./components/ChatRooms";
 // import client from "./utils/axiosClient";
 
 function App() {
-  // const id = useParams();
-  // console.log("PATHTHHH:", path);
-  // console.log("IDDDD :", id);
-  // if ("serviceWorker" in navigator) {
-  //   const handleServiceWorker = async () => {
-  //     console.log("hellooo masuk function");
-  //     const register = await navigator.serviceWorker.register("/sw.js");
-
-  //     const subscription = await register.pushManager.subscribe({
-  //       userVisibleOnly: true,
-  //       applicationServerKey:
-  //         "BJTARPAsvRE9jC-qCLiwOIWQzx3KBaFrA7t2DUq3iYEiyBUv6wlnY2M9L5sbcrhGbl6MG6uX5wcpoN9XoH0WCEk",
-  //     });
-
-  //     const res = await client.post("/subscribe", {
-  //       ...subscription.toJSON(),
-  //       user_id: id.id,
-  //       // JSON.stringify(subscription)
-  //     });
-  //     console.log(res.data.message);
-  //   };
-  //   handleServiceWorker();
-  // }
+  const auth = getCookie("authToken");
   return (
     <Router>
       <Routes>
@@ -60,19 +42,18 @@ function App() {
             </Layout>
           }
         />
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          }
-        />
-
-        <Route 
-          path="/listchat" 
-          element={<ChatRooms />} 
-        />
+        {auth ? (
+          <Route path="/" element={<Navigate to="/feeds" replace />} />
+        ) : (
+          <Route
+            path="/"
+            element={
+              <Layout cn="bg-white">
+                <Dashboard />
+              </Layout>
+            }
+          />
+        )}
 
         <Route path="/users" element={<UsersList />} />
         <Route path="/requests" element={<ConnectionRequests />} />
@@ -80,7 +61,7 @@ function App() {
         <Route
           path="/profil/:id"
           element={
-            <Layout cn="">
+            <Layout>
               <ProfilPage />
             </Layout>
           }

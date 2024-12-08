@@ -1,7 +1,4 @@
-// import React from "react";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -10,7 +7,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [isRegistered, setIsRegistered] = useState(false);
+
   const handleRegister = async () => {
     try {
       if (!username || !name || !email || !password || !confirmPassword) {
@@ -39,9 +36,7 @@ const RegisterPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setIsRegistered(true);
           console.log(data.message);
-          // console.log(data.user);
           console.log("response ok");
         } else {
           console.log("response not ok");
@@ -62,7 +57,9 @@ const RegisterPage = () => {
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">Register</h2>
+        <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">
+          Register
+        </h2>
         {/* username */}
         <input
           type="text"
@@ -108,13 +105,21 @@ const RegisterPage = () => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        <button onClick={handleRegister} className="w-full p-3 bg-[#0073b1] text-white font-semibold rounded-md shadow-md hover:bg-[#005c8c] transition duration-200">
+        <button
+          onClick={handleRegister}
+          className="w-full p-3 bg-[#0073b1] text-white font-semibold rounded-md shadow-md hover:bg-[#005c8c] transition duration-200"
+        >
           Register
         </button>
         {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">Already have an account?</p>
-          <a href="/login" className="text-sm text-[#0073b1] hover:text-[#005c8c]">Sign in</a>
+          <a
+            href="/login"
+            className="text-sm text-[#0073b1] hover:text-[#005c8c]"
+          >
+            Sign in
+          </a>
         </div>
       </div>
     </div>

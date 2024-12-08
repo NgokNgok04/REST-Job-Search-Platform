@@ -4,6 +4,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      screens: {
+        xs: "550px",
+      },
       animation: {
         "loading-bar": "loading-bar 1s linear infinite alternate",
       },
