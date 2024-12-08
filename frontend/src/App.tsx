@@ -14,8 +14,32 @@ import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
+// import client from "./utils/axiosClient";
 
 function App() {
+  // const id = useParams();
+  // console.log("PATHTHHH:", path);
+  // console.log("IDDDD :", id);
+  // if ("serviceWorker" in navigator) {
+  //   const handleServiceWorker = async () => {
+  //     console.log("hellooo masuk function");
+  //     const register = await navigator.serviceWorker.register("/sw.js");
+
+  //     const subscription = await register.pushManager.subscribe({
+  //       userVisibleOnly: true,
+  //       applicationServerKey:
+  //         "BJTARPAsvRE9jC-qCLiwOIWQzx3KBaFrA7t2DUq3iYEiyBUv6wlnY2M9L5sbcrhGbl6MG6uX5wcpoN9XoH0WCEk",
+  //     });
+
+  //     const res = await client.post("/subscribe", {
+  //       ...subscription.toJSON(),
+  //       user_id: id.id,
+  //       // JSON.stringify(subscription)
+  //     });
+  //     console.log(res.data.message);
+  //   };
+  //   handleServiceWorker();
+  // }
   return (
     <Router>
       <Routes>
@@ -72,21 +96,21 @@ function App() {
           }
         />
         <Route
-          path="/chat/:id" 
-          element = {
+          path="/chat/:id"
+          element={
             <Layout>
-              <Chat/>  
+              <Chat />
             </Layout>
           }
         />
         <Route
           path="/test"
-          element = {
+          element={
             <Layout>
-              <Broh/>
+              <Broh />
             </Layout>
           }
-          />
+        />
 
         <Route
           path="/feeds"
