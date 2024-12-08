@@ -169,7 +169,7 @@ export const FeedController = {
       res.status(201).json({
         success: true,
         message: "Post created successfully",
-        data: {
+        body: {
           ...post,
           id: post.id.toString(),
           user_id: post.user_id.toString(),

@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -13,11 +13,12 @@ import CreatePost from "@/components/Feed/CreatePost";
 import EditPost from "@/components/Feed/UpdatePost";
 import DeletePost from "@/components/Feed/DeletePost";
 
-interface Post {
+export interface Post {
   id: string;
   user_id: string;
   content: string;
   created_at: string;
+  updated_at: string;
 }
 
 const FeedPage: React.FC = () => {
@@ -25,21 +26,14 @@ const FeedPage: React.FC = () => {
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  // modals
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editPostId, setEditPostId] = useState<string | null>(null);
   const [deletePostId, setDeletePostId] = useState<string | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
 
-  // fetch with infinity scroll
   const fetchPosts = async () => {
-    console.log("Fetching posts...");
-    console.log("Loading:", loading, "HasMore:", hasMore);
-
-    if (loading || !hasMore) {
-      console.log("Fetch skipped due to conditions.");
-      return;
-    }
+    console.log("loading: ", loading, "hasmore: ", hasMore);
+    if (loading || !hasMore) return;
 
     setLoading(true);
     try {
@@ -47,9 +41,9 @@ const FeedPage: React.FC = () => {
         `http://localhost:3000/api/feed?cursor=${cursor}&limit=10`,
         { withCredentials: true }
       );
-      console.log("API response:", response.data);
 
       const { posts: newPosts, nextCursor } = response.data.body;
+
       setPosts((prev) => [...prev, ...newPosts]);
       setCursor(nextCursor);
       setHasMore(nextCursor !== null);
@@ -62,49 +56,61 @@ const FeedPage: React.FC = () => {
 
   const lastPostRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    console.log("useEffect triggered");
-
     if (observer.current) observer.current.disconnect();
 
     observer.current = new IntersectionObserver((entries) => {
-      console.log("IntersectionObserver triggered", entries);
       if (entries[0].isIntersecting) {
-        console.log("Last post in view, fetching more posts...");
         fetchPosts();
       }
     });
 
-    if (lastPostRef.current) {
-      console.log("Observing last post:", lastPostRef.current);
-      observer.current.observe(lastPostRef.current);
-    } else {
-      console.log("No last post to observe.");
-    }
+    if (lastPostRef.current) observer.current.observe(lastPostRef.current);
 
     return () => {
       if (observer.current) observer.current.disconnect();
     };
   }, [cursor, hasMore]);
 
+  const hasFetched = useRef(false);
+  useEffect(() => {
+    if (!hasFetched.current) {
+      fetchPosts();
+      hasFetched.current = true;
+    }
+  }, []);
+
+  const handleCreatePostSuccess = (newPost: Post) => {
+    console.log("Handle");
+    setCreateOpen(false);
+    setPosts((prevPosts) => [newPost, ...prevPosts]); // Tambahkan post baru di awal
+  };
+
+  const handleUpdatePostSuccess = (updatedPost: Post) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === updatedPost.id
+          ? {
+              ...post,
+              content: updatedPost.content,
+              updated_at: updatedPost.updated_at,
+            }
+          : post
+      )
+    );
+    setEditPostId(null); 
+  };
+
+  const handleDeletePostSuccess = () => {
+    setDeletePostId(null);
+    setPosts(
+      (prevPosts) => prevPosts.filter((post) => post.id !== deletePostId) // Hapus post berdasarkan id
+    );
+  };
+
   return (
     <div className="feed-page">
       {/* Open Create modal */}
-      <Button
-        onClick={() => {
-          fetchPosts();
-        }}
-      >
-        Fetch
-      </Button>
-
-      <Button
-        onClick={() => {
-          setCreateOpen(true);
-          fetchPosts();
-        }}
-      >
-        Create Post
-      </Button>
+      <Button onClick={() => setCreateOpen(true)}>Create Post</Button>
 
       {/* Posts */}
       <div>
@@ -141,9 +147,10 @@ const FeedPage: React.FC = () => {
             <DialogTitle>Create Post</DialogTitle>
           </DialogHeader>
           <CreatePost
-            onClose={() => {
-              setCreateOpen(false);
-              fetchPosts();
+            onClose={(newPost) => {
+              if (newPost) {
+                handleCreatePostSuccess(newPost);
+              }
             }}
           />
         </DialogContent>
@@ -158,10 +165,10 @@ const FeedPage: React.FC = () => {
             </DialogHeader>
             <EditPost
               postId={editPostId}
-              onClose={() => {
-                setEditPostId(null);
-                setPosts([]);
-                fetchPosts();
+              onClose={(updatedPost) => {
+                if (updatedPost) {
+                  handleUpdatePostSuccess(updatedPost);
+                }
               }}
             />
           </DialogContent>
@@ -184,11 +191,7 @@ const FeedPage: React.FC = () => {
             <DialogFooter>
               <DeletePost
                 postId={deletePostId}
-                onClose={() => {
-                  setDeletePostId(null);
-                  setPosts([]);
-                  fetchPosts();
-                }}
+                onClose={handleDeletePostSuccess}
               />
             </DialogFooter>
           </DialogContent>

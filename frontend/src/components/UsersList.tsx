@@ -26,11 +26,10 @@ const debounce = (func: Function, delay: number) => {
 };
 
 const UsersList: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // Use null as initial state
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); 
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [sendingRequest, setSendingRequest] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -48,7 +47,7 @@ const UsersList: React.FC = () => {
   }, []);
 
   const fetchUsers = async (query: string = "") => {
-    setError(""); // Clear any previous error
+    setError(""); 
     try {
       const response = await axios.get("http://localhost:3000/api/users", {
         params: { search: query },
@@ -70,7 +69,6 @@ const UsersList: React.FC = () => {
   };
 
   const sendConnectionRequest = async (toId: string) => {
-    setSendingRequest(toId);
     setError("");
 
     try {
@@ -84,9 +82,7 @@ const UsersList: React.FC = () => {
       const errorMessage =
         error.response?.data?.message || "Failed to send request.";
       setError(errorMessage);
-    } finally {
-      setSendingRequest(null);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -96,7 +92,6 @@ const UsersList: React.FC = () => {
   }, [isLoggedIn]);
 
   if (isLoggedIn === null) {
-    // While checking the login status, you can render a loading message or redirect
     return <p>Loading...</p>;
   }
 
