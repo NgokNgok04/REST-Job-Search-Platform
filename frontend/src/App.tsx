@@ -19,7 +19,7 @@ import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
-import { getCookie } from "./utils/cookieHandler";
+// import client from "./utils/axiosClient";
 
 function App() {
   const auth = getCookie("authToken");

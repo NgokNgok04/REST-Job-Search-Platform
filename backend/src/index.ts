@@ -32,7 +32,6 @@ const portWebsocket = 8000;
 startWebSocketServer(portWebsocket);
 console.log(`WebSocket server started on port ${portWebsocket}`);
 
-// swagger 
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
@@ -47,7 +46,7 @@ const swaggerOptions = {
           },
       ],
   },
-  apis: [path.join(__dirname, 'routes.ts')], // Make sure path is correct
+  apis: [path.join(__dirname, 'routes.ts')], 
 };
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
