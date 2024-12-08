@@ -452,11 +452,10 @@ export const defineRoutes = (app: Express) => {
     "/api/chat/connection/:userId",
     AuthMiddleware.authorization,
     ChatController.isConnected
-  )
-  
-  app.get("/api/allnotif", notifController.getNotif);
+  );
+
   app.post("/api/subscribe", notifController.subscribe);
-  app.post("/api/send", notifController.sendNotification);
+  app.post("/api/sendChat", notifController.sendChat);
 
   // app.use("/store", express.static(path.join(__dirname, "../store")));
 };

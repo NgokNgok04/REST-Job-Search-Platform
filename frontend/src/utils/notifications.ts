@@ -8,6 +8,17 @@ type NotifResponse = {
   };
 };
 
+type PayloadNotif = {
+  title: string;
+  body: string;
+  icon: string;
+  data?: {
+    url: string;
+    tag: string;
+  };
+  // message: string;
+};
+
 export const subscribeToPushNotifications = async (
   subscription: PushSubscription,
   userId: number
@@ -31,18 +42,27 @@ export const enableNotifications = async (userId: number) => {
     return;
   }
 
-  const registration = await navigator.serviceWorker.register("/sw.js");
-  // const registration = await navigator.serviceWorker.ready;
-  // console.log("vite public key :", import.meta.env.);
-  console.log("vite public key :", import.meta.env.VITE_PUBLIC_VAPID_KEY);
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(
-      import.meta.env.VITE_PUBLIC_VAPID_KEY!
-    )!,
-  });
-  console.log("SUBSCRIPTION :", subscription);
-  await subscribeToPushNotifications(subscription, userId);
+  // Request Notification Permission
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    console.error("Notification permission denied.");
+    return;
+  }
+  console.log("Notification permission granted.");
+
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js");
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(
+        import.meta.env.VITE_PUBLIC_VAPID_KEY!
+      )!,
+    });
+    console.log("SUBSCRIPTION :", subscription);
+    await subscribeToPushNotifications(subscription, userId);
+  } catch (error) {
+    console.error("Error enabline notifications:", error);
+  }
 };
 
 // Helper function to convert VAPID key to Uint8Array
@@ -57,3 +77,33 @@ const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
   }
   return outputArray;
 };
+
+export type PushChatNotification = {
+  name: string;
+  to_id: string;
+  room_id: string;
+  message: string;
+};
+export async function sendNotificationChat(payload: PushChatNotification) {
+  try {
+    const response = await client.post("/sendChat", payload);
+    console.log("Notification sent successfully", response.data);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+}
+
+export async function handleSendNotification(
+  id: number,
+  payload: PayloadNotif
+) {
+  try {
+    const response = await client.post("/send", {
+      user_id: id,
+      payload: payload,
+    });
+    console.log("Notification sent successfully", response.data);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+}
