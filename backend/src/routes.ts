@@ -450,6 +450,12 @@ export const defineRoutes = (app: Express) => {
   );
 
   app.get(
+    "/api/listchat", 
+    AuthMiddleware.authorization,
+    ChatController.getChatRooms 
+  )
+
+  app.get(
     "/api/chat/connection/:userId",
     AuthMiddleware.authorization,
     ChatController.isConnected

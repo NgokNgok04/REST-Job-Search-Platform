@@ -3,9 +3,66 @@ import { prisma } from "../prisma";
 import responseAPI from "../utils/responseAPI";
 
 export const ChatController = {
+  getChatRooms: async (req: Request, res: Response) => {
+    const userId = req.user.id; 
+    try {
+        const chats = await prisma.chat.findMany({
+            where: {
+                OR: [
+                    { from_id: userId },
+                    { to_id: userId },
+                ],
+            },
+            orderBy: {
+                timestamp: "desc",
+            },
+        });
+
+        const chatRoomsMap = new Map<string, any>();
+
+        for (const chat of chats) {
+          const key = chat.from_id < chat.to_id
+              ? `${chat.from_id}-${chat.to_id}`
+              : `${chat.to_id}-${chat.from_id}`;
+      
+          if (!chatRoomsMap.has(key)) {
+              chatRoomsMap.set(key, chat);
+          }
+      }
+
+        const chatRooms = Array.from(chatRoomsMap.values()).map((chat) => {
+          let otherUserId = "0"; 
+            if(Number(chat.from_id) == userId){
+              otherUserId = chat.to_id.toString();
+            }else if(Number(chat.to_id)){
+              otherUserId = chat.from_id.toString();
+            }
+            return {
+                otherUserId,
+                lastMessage: {
+                    message: String(chat.message),
+                    from_id: chat.from_id.toString(),
+                    to_id: chat.to_id.toString(),
+                    timestamp: String(chat.timestamp),
+                },
+            };
+        });
+        console.log(chatRooms);
+        if (chatRooms.length > 0) {
+            responseAPI(res, 200, true, "Chat rooms retrieved", { chatRooms });
+        } else {
+            responseAPI(res, 404, false, "No chat rooms found", null);
+        }
+    } catch (err) {
+        console.error(err); 
+        responseAPI(res, 500, false, "Internal Server Error", null);
+    }
+  },
+
+
   getChat: async (req: Request, res: Response) => {
-    const fromId = req.user.id; //yang ngechat
-    const userId = Number(req.params.userId); //yang dichat
+    const fromId = req.user.id; 
+    const userId = Number(req.params.userId); 
 
     try {
       const exists = await prisma.connection.count({

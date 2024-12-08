@@ -1,7 +1,7 @@
 // import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
-import LoginPage from "./components/LoginPage";
+import LoginPage from "./Pages/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
@@ -14,6 +14,7 @@ import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
+import ChatRooms from "./components/ChatRooms";
 // import client from "./utils/axiosClient";
 
 function App() {
@@ -66,6 +67,11 @@ function App() {
               <Dashboard />
             </Layout>
           }
+        />
+
+        <Route 
+          path="/listchat" 
+          element={<ChatRooms />} 
         />
 
         <Route path="/users" element={<UsersList />} />
