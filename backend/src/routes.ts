@@ -1,5 +1,5 @@
 // routes.ts
-import { Express } from "express";
+import express, { Express } from "express";
 import { AuthController } from "./controllers/authController";
 import { ProfileController } from "./controllers/profileController";
 import { AuthMiddleware } from "./controllers/authMiddleware";
@@ -9,7 +9,7 @@ import { ChatController } from "./controllers/chatController";
 import { FeedController } from "./controllers/feedController";
 import { Request, Response } from "express";
 import { notifController } from "./controllers/notifController";
-
+import path from "path";
 export const defineRoutes = (app: Express) => {
   /**
    * @swagger
@@ -457,6 +457,7 @@ export const defineRoutes = (app: Express) => {
 
   app.post("/api/subscribe", notifController.subscribe);
   app.post("/api/sendChat", notifController.sendChat);
+  app.post("/api/sendFeed", notifController.sendFeed);
 
-  // app.use("/store", express.static(path.join(__dirname, "../store")));
+  app.use("/store", express.static(path.join(__dirname, "../store")));
 };

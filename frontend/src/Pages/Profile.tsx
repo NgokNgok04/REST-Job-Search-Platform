@@ -8,7 +8,6 @@ import { useParams } from "react-router-dom";
 import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
 import EditPP from "@/components/Profile/EditPP";
-import { Button } from "@/components/ui/button";
 import { enableNotifications } from "@/utils/notifications";
 // import requestNotificationPermission from "@/utils/notifPermission";
 
@@ -88,20 +87,8 @@ export default function ProfilPage() {
     }
   }, [id]);
 
-  async function handleSendNotif() {
-    try {
-      const response = await client.post("/send", {
-        user_id: 2,
-        payload: {
-          title: "Hello",
-          body: "HELLO FROM HERE",
-        },
-      });
-
-      console.log("Notification sent successfully", response.data);
-    } catch (error) {
-      console.error("Error sending notification:", error);
-    }
+  async function handleClickConnect() {
+    enableNotifications(Number(id));
   }
 
   if (!isUserFound) {
@@ -139,7 +126,12 @@ export default function ProfilPage() {
         </div>
 
         {!profileData?.body.isConnected && !profileData?.body.isOwner && (
-          <button className="mx-5 mt-2 mb-4 bg-[#0A66C2] text-white px-4 py-1 rounded-full">
+          <button
+            className="mx-5 mt-2 mb-4 bg-[#0A66C2] text-white px-4 py-1 rounded-full"
+            onClick={() => {
+              handleClickConnect();
+            }}
+          >
             Connect
           </button>
         )}
@@ -158,14 +150,6 @@ export default function ProfilPage() {
         section="Latest Posts"
         isOwner={profileData?.body.isOwner}
       />
-
-      <Button className="mb-4" onClick={() => enableNotifications(Number(id))}>
-        Click me!
-      </Button>
-
-      <Button className="mb-4" onClick={() => handleSendNotif()}>
-        Send Notification
-      </Button>
     </div>
   );
 }

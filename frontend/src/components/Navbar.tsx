@@ -1,13 +1,15 @@
 import logo from "/logo.png";
 import articlesLogo from "/icons/articles.svg";
 import peopleLogo from "/icons/people.svg";
+import { getCookie } from "@/utils/cookieHandler";
 export default function Navbar() {
+  const auth = getCookie("authToken");
   return (
     <div className="fixed font-semibold w-full">
       <div className="flex flex-row justify-between bg-white px-10">
         <img src={logo} width={70} />
         <div className="flex flex-row gap-10 items-center">
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 md:none">
             <button className="flex flex-col items-center justify-center">
               <img
                 className="flex flex-col text-[#666666]"
@@ -16,7 +18,10 @@ export default function Navbar() {
               />
               <p className="text-[#666666] font-normal text-[14px]">Feeds</p>
             </button>
-            <button onClick={() => window.location.href = '/users'} className="flex flex-col items-center justify-center">
+            <button
+              onClick={() => (window.location.href = "/users")}
+              className="flex flex-col items-center justify-center"
+            >
               <img
                 className="flex flex-col text-[#666666]"
                 src={peopleLogo}

@@ -1,8 +1,4 @@
-// import React from "react";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
-// import { Navigate } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -40,15 +36,12 @@ const LoginPage = () => {
       }
     }
   };
-  // if (success) {
-  //   console.log("MASUKKK PAK EKOO");
-  // } else {
-  //   console.log("BELUM MASUK");
-  // }
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">Sign In</h2>
+        <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">
+          Sign In
+        </h2>
         <input
           type="email"
           placeholder="mail@gmail.com"
@@ -70,10 +63,15 @@ const LoginPage = () => {
         >
           Login
         </button>
-        {error && (<p className="mt-4 text-red-500 text-center">{error}</p>)}
+        {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">Don't have an account?</p>
-          <a href="/register" className="text-sm text-[#0073b1] hover:text-[#005c8c]">Join now</a>
+          <a
+            href="/register"
+            className="text-sm text-[#0073b1] hover:text-[#005c8c]"
+          >
+            Join now
+          </a>
         </div>
       </div>
     </div>
