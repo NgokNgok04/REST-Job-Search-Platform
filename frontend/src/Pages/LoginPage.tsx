@@ -36,6 +36,7 @@ const LoginPage = () => {
       }
     }
   };
+  console.log(success);
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-full max-w-md">
