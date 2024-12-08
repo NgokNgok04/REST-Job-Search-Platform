@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import NavbarTest from "./Navbar/Navbar";
+import Navbar from "./Navbar/Navbar";
 type LayoutProps = {
   cn?: string;
   children: ReactNode;
@@ -7,7 +7,7 @@ type LayoutProps = {
 const Layout: React.FC<LayoutProps> = ({ cn, children }) => {
   return (
     <div className={`flex flex-col min-h-screen max-h-screen  ${cn}`}>
-      <NavbarTest />
+      <Navbar />
       <main className=" px-10">{children}</main>
     </div>
   );
