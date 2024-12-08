@@ -6,46 +6,47 @@ import { ClockIcon, UserGroupIcon } from "@heroicons/react/24/solid";
 import ChatIcon from "./ChatIcon";
 import NotificationIcon from "./NotificationIcon";
 import { Fragment } from "react/jsx-runtime";
-
-const menuBeforeLogin = [
-  {
-    path: "/users",
-    name: "Profile",
-    icon: <UserGroupIcon height={27} width={27} />,
-  },
-  {
-    path: "/feeds",
-    name: "Home",
-    icon: <HomeIcon />,
-  },
-];
-
-const menuAfterLogin = [
-  {
-    path: "/connections/1",
-    name: "My Network",
-    icon: <GroupIcon />,
-  },
-  {
-    path: "/chat/1",
-    name: "Chat",
-    icon: <ChatIcon />,
-  },
-  {
-    path: "/requests",
-    name: "Request",
-    icon: <ClockIcon height={27} width={27} />,
-  },
-  {
-    path: "/notifications",
-    name: "Notification",
-    icon: <NotificationIcon />,
-  },
-];
+import { useAuth } from "@/contexts/authContext";
 
 export default function NavbarMenu() {
   const auth = getCookie("authToken");
   const location = useLocation();
+  const { idUser, name, isLogin, username } = useAuth();
+  const menuBeforeLogin = [
+    {
+      path: "/users",
+      name: "Profile",
+      icon: <UserGroupIcon height={27} width={27} />,
+    },
+    {
+      path: "/feeds",
+      name: "Home",
+      icon: <HomeIcon />,
+    },
+  ];
+  console.log("IDDD USERRRR", idUser, name, isLogin, username);
+  const menuAfterLogin = [
+    {
+      path: `/connections/${idUser}`,
+      name: "My Network",
+      icon: <GroupIcon />,
+    },
+    {
+      path: "/chats",
+      name: "Chat",
+      icon: <ChatIcon />,
+    },
+    {
+      path: "/requests",
+      name: "Request",
+      icon: <ClockIcon height={27} width={27} />,
+    },
+    {
+      path: "/notifications",
+      name: "Notification",
+      icon: <NotificationIcon />,
+    },
+  ];
 
   let isPublic;
   if (

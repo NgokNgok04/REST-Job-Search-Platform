@@ -82,7 +82,11 @@ export const defineRoutes = (app: Express) => {
 
   // Feed routes
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
-  app.get("/api/feed/:post_id", AuthMiddleware.authorization, FeedController.getPostById);
+  app.get(
+    "/api/feed/:post_id",
+    AuthMiddleware.authorization,
+    FeedController.getPostById
+  );
   app.post(
     "/api/feed",
     AuthMiddleware.authorization,
@@ -268,9 +272,9 @@ export const defineRoutes = (app: Express) => {
   /**
    * PROFILE ROUTES
    */
+  app.get("/api/profil/self", ProfileController.getSelf);
   app.get("/api/profil/:id", ProfileController.getProfile);
   app.put("/api/profil/:id", ProfileController.setProfile);
-  app.get("/api/profil", ProfileController.getAllProfiles);
 
   /**
    * CHAT ROUTES
@@ -450,10 +454,10 @@ export const defineRoutes = (app: Express) => {
   );
 
   app.get(
-    "/api/listchat", 
+    "/api/listchat",
     AuthMiddleware.authorization,
-    ChatController.getChatRooms 
-  )
+    ChatController.getChatRooms
+  );
 
   app.get(
     "/api/chat/connection/:userId",

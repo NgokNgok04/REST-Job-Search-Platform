@@ -19,6 +19,8 @@ import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
+import { getCookie } from "./utils/cookieHandler";
+import ChatRooms from "./components/ChatRooms";
 // import client from "./utils/axiosClient";
 
 function App() {
@@ -55,9 +57,30 @@ function App() {
           />
         )}
 
-        <Route path="/users" element={<UsersList />} />
-        <Route path="/requests" element={<ConnectionRequests />} />
-        <Route path="/connections/:userId" element={<ConnectionsList />} />
+        <Route
+          path="/users"
+          element={
+            <Layout>
+              <UsersList />
+            </Layout>
+          }
+        />
+        <Route
+          path="/requests"
+          element={
+            <Layout>
+              <ConnectionRequests />
+            </Layout>
+          }
+        />
+        <Route
+          path="/connections/:userId"
+          element={
+            <Layout>
+              <ConnectionsList />
+            </Layout>
+          }
+        />
         <Route
           path="/profil/:id"
           element={
@@ -79,6 +102,14 @@ function App() {
           element={
             <Layout>
               <Skills />
+            </Layout>
+          }
+        />
+        <Route
+          path="/chats"
+          element={
+            <Layout>
+              <ChatRooms />
             </Layout>
           }
         />

@@ -6,25 +6,39 @@ import Connection from "../models/Connection";
 const prisma = new PrismaClient();
 
 export const ProfileController = {
-  getAllProfiles: async (req: any, res: any) => {
+  getSelf: async (req: any, res: any) => {
     try {
-      const user = await prisma.user.findMany();
-      const payloadUser = user.map((user) => ({
-        id: user.id.toString(),
+      const isLogin = !!req.cookies.authToken;
+
+      if (!isLogin) {
+        responseAPI(res, 200, false, "User are not login!");
+        return;
+      }
+
+      const decoded = jwt.verify(
+        req.cookies.authToken,
+        process.env.JWT_SECRET || ""
+      );
+      req.user = decoded;
+
+      const user = await User.getUser(req.user.id);
+
+      if (!user) {
+        responseAPI(res, 200, false, "User not found");
+        return;
+      }
+      const data = {
         username: user.username,
-        email: user.email,
-        full_name: user.full_name,
-        profile_photo_path: user.profile_photo_path,
-        work_history: user.work_history,
-        skills: user.skills,
-      }));
-      res
-        .status(200)
-        .json({ status: true, message: "Test success", body: payloadUser });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, message: "Internal server error", body: null });
+        id: req.user.id,
+        name: user.full_name,
+        profile_photo: user.profile_photo_path,
+      };
+
+      responseAPI(res, 200, true, "Success get User Data", data);
+      return;
+    } catch (err: unknown) {
+      responseAPI(res, 500, false, "Internal Server Error", {});
+      return;
     }
   },
   getProfile: async (req: any, res: any) => {

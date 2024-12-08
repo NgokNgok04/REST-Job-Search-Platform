@@ -1,34 +1,27 @@
+import { useAuth } from "@/contexts/authContext";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const handleLogin = async () => {
     if (!email || !password) {
       setError("All fields are required");
     }
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
+      const response = await login({
+        email,
+        password,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.message);
+      if (!response.status) {
+        setError(response.message);
       } else {
-        if (data.body.status === false) {
-          setError(data.body.message);
-        } else {
-          setSuccess(true);
-          localStorage.setItem("token", data.body.token);
-        }
+        localStorage.setItem("token", response.body.token);
+        navigate("/");
       }
     } catch (err) {
       if (err) {
@@ -36,7 +29,6 @@ const LoginPage = () => {
       }
     }
   };
-  console.log(success);
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-full max-w-md">
