@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchUser = async () => {
       try {
         const user = await UserAPI.getSelf();
+        console.log(user);
         if (user.username) {
           console.log("KEPANGGIL");
           setIsLogin(true);

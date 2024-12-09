@@ -27,6 +27,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onClose }) => {
       const newPost = response.data.body;
       console.log(newPost);
       onClose(newPost);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Failed to create post.";
@@ -38,15 +39,16 @@ const CreatePost: React.FC<CreatePostProps> = ({ onClose }) => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="flex flex-col w-full gap-5">
         <Textarea
           value={content}
+          className="h-[200px]"
           onChange={(e) => setContent(e.target.value)}
           placeholder="Create a new post..."
           required
         />
         {error && <p>{error}</p>}
-        <Button disabled={isSubmitting}>
+        <Button disabled={isSubmitting} className="self-end w-[100px]">
           {isSubmitting ? "Creating..." : "Create Post"}
         </Button>
       </form>

@@ -21,6 +21,7 @@ import Chat from "./components/Chat";
 import Broh from "./components/Broh";
 import { getCookie } from "./utils/cookieHandler";
 import ChatRooms from "./components/ChatRooms";
+import Feed from "./Pages/FeedTest";
 // import client from "./utils/axiosClient";
 
 function App() {
@@ -157,10 +158,18 @@ function App() {
         />
 
         <Route
-          path="/feeds"
+          path="/feedsdwadw"
           element={
             <Layout>
               <FeedPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/feeds"
+          element={
+            <Layout>
+              <Feed />
             </Layout>
           }
         />
