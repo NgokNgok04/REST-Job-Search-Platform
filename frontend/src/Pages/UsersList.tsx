@@ -27,37 +27,15 @@ const UsersList: React.FC = () => {
 
   const toast = useToast();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3000/api/protected",
-          {
-            withCredentials: true,
-          }
-        );
-        setIsLoggedIn(response.data.success);
-      } catch {
-        setIsLoggedIn(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
   const fetchUsers = async (query: string = "") => {
-    if (isLoggedIn === null) return; 
-
     try {
-      const api = isLoggedIn
-        ? "http://localhost:3000/api/users-logged"
-        : "http://localhost:3000/api/users";
-
-      const response = await axios.get(api, {
+      const response = await axios.get("http://localhost:3000/api/users", {
         params: { search: query },
         withCredentials: true,
       });
 
-      setUsers(response.data.body || []);
+      setUsers(response.data.body.users || []);
+      setIsLoggedIn(response.data.body.isLogin);
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || "Failed to fetch users.";
@@ -70,10 +48,8 @@ const UsersList: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isLoggedIn !== null) {
-      fetchUsers();
-    }
-  }, [isLoggedIn]);
+    fetchUsers();
+  }, []);
 
   const debouncedFetchUsers = useCallback(debounce(fetchUsers, 300), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
+import jwt from "jsonwebtoken";
 
 const serializeConnectionAndRequest = (connection: any | any[]) => {
   const connections = Array.isArray(connection) ? connection : [connection];
@@ -277,74 +278,6 @@ export const ConnectionController = {
     }
   },
 
-  getConnectionsLoggedIn: async (req: Request, res: Response) => {
-    const { userId } = req.params;
-    const loggedInUserId = req.user?.id;
-
-    if (!userId || isNaN(Number(userId))) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or missing 'userId' parameter",
-        error: null,
-      });
-    }
-
-    const userIdBigInt = BigInt(userId);
-    const loggedInUserIdBigInt = loggedInUserId ? BigInt(loggedInUserId) : null;
-
-    try {
-      const connections = await prisma.connection.findMany({
-        where: { from_id: userIdBigInt },
-        include: {
-          To: {
-            select: {
-              id: true,
-              username: true,
-              full_name: true,
-              profile_photo_path: true,
-            },
-          },
-        },
-      });
-
-      const userConnections = await Promise.all(
-        connections.map(async (connection) => {
-          const isConnected = loggedInUserIdBigInt
-            ? await prisma.connection.findFirst({
-                where: {
-                  from_id: loggedInUserIdBigInt,
-                  to_id: connection.To.id,
-                },
-              })
-            : false;
-
-          return {
-            id: connection.To.id.toString(),
-            username: connection.To.username ,
-            full_name: connection.To.full_name || "",
-            profile_photo_path: connection.To.profile_photo_path || null,
-            isConnected: Boolean(isConnected),
-          };
-        })
-      );
-
-      res.status(200).json({
-        success: true,
-        message: "Connections fetched successfully",
-        body: userConnections,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch connections",
-        error:
-          error instanceof Error
-            ? { code: "SERVER_ERROR", details: error.message }
-            : null,
-      });
-    }
-  },
-
   getConnections: async (req: Request, res: Response) => {
     const { userId } = req.params;
 
@@ -373,18 +306,45 @@ export const ConnectionController = {
         },
       });
 
-      const userConnections = connections.map((connection) => ({
-        id: connection.To.id.toString(),
-        username: connection.To.username,
-        full_name: connection.To.full_name || "N/A",
-        profile_photo_path: connection.To.profile_photo_path || null,
-        isConnected: false,
-      }));
+      const isLogin = !!req.cookies.authToken;
+      let loggedInUserIdBigInt : bigint | undefined;
+      if (isLogin) {
+        const decoded = jwt.verify(
+          req.cookies.authToken,
+          process.env.JWT_SECRET || ""
+        );
+        req.user = decoded;
+        loggedInUserIdBigInt = BigInt(req.user.id);
+      }
+
+      const userConnections = await Promise.all(
+        connections.map(async (connection) => {
+          let isConnected = false;
+
+          if (isLogin) {
+            const connectionExists = await prisma.connection.findFirst({
+              where: {
+                from_id: loggedInUserIdBigInt,
+                to_id: connection.To.id,
+              },
+            });
+            isConnected = Boolean(connectionExists);
+          }
+
+          return {
+            id: connection.To.id.toString(),
+            username: connection.To.username,
+            full_name: connection.To.full_name || "",
+            profile_photo_path: connection.To.profile_photo_path || null,
+            isConnected,
+          };
+        })
+      );
 
       res.status(200).json({
         success: true,
         message: "Connections fetched successfully",
-        body: userConnections,
+        body: { connections: userConnections, isLogin: isLogin },
       });
     } catch (error) {
       res.status(500).json({
@@ -397,54 +357,4 @@ export const ConnectionController = {
       });
     }
   },
-
-  // getConnections: async (req: Request, res: Response) => {
-  //   const { userId } = req.params; // Ambil userId dari route parameter
-
-  //   if (!userId || isNaN(Number(userId))) {
-  //     return res.status(400).json({
-  //       success: false,
-  //       message: "Invalid or missing 'userId' parameter",
-  //       error: null,
-  //     });
-  //   }
-
-  //   const userIdBigInt = BigInt(userId);
-
-  //   try {
-  //     const connections = await prisma.connection.findMany({
-  //       where: { from_id: userIdBigInt },
-  //       include: {
-  //         To: {
-  //           select: {
-  //             id: true,
-  //             username: true,
-  //             full_name: true,
-  //             profile_photo_path: true,
-  //           },
-  //         },
-  //       },
-  //     });
-
-  //     res.status(200).json({
-  //       success: true,
-  //       message: "Connections fetched successfully",
-  //       body: connections.map((connection) => ({
-  //         id: connection.To.id.toString(),
-  //         username: connection.To.username,
-  //         full_name: connection.To.full_name || "N/A",
-  //         profile_photo_path: connection.To.profile_photo_path || null,
-  //       })),
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({
-  //       success: false,
-  //       message: "Failed to fetch connections",
-  //       error:
-  //         error instanceof Error
-  //           ? { code: "SERVER_ERROR", details: error.message }
-  //           : null,
-  //     });
-  //   }
-  // },
 };

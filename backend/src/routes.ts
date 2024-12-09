@@ -16,11 +16,6 @@ export const defineRoutes = (app: Express) => {
   // User routes
   app.get("/api/users", UserController.getUsers);
   app.get(
-    "/api/users-logged",
-    AuthMiddleware.authorization,
-    UserController.getUsersLoggedIn
-  );
-  app.get(
     "/api/logged-id,",
     AuthMiddleware.authorization,
     UserController.getLoggedInUser
@@ -43,11 +38,6 @@ export const defineRoutes = (app: Express) => {
     ConnectionController.respondToRequest
   );
   app.get("/api/connections/:userId", ConnectionController.getConnections);
-  app.get(
-    "/api/connections-logged/:userId",
-    AuthMiddleware.authorization,
-    ConnectionController.getConnectionsLoggedIn
-  );
   app.delete(
     "/api/connections/unconnect",
     AuthMiddleware.authorization,

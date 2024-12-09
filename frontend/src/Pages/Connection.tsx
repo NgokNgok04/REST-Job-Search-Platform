@@ -18,49 +18,31 @@ const ConnectionsList: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  // Cek apakah pengguna login atau tidak
-  const checkAuth = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/protected", {
-        withCredentials: true,
-      });
-      setIsLoggedIn(response.data.success);
-    } catch {
-      setIsLoggedIn(false);
-    }
-  };
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-
   const fetchConnections = async () => {
     if (!userId) {
       setError("User ID is required.");
       return;
     }
-
-    if (isLoggedIn === null) return; 
-
+    
     setLoading(true);
     setError("");
 
     try {
-      const api = isLoggedIn
-        ? `http://localhost:3000/api/connections-logged/${userId}`
-        : `http://localhost:3000/api/connections/${userId}`;
       const response = await axios.get<{
         success: boolean;
-        body: User[];
-      }>(api, {
+        body: {
+          connections: User[];
+          isLogin: true;
+        };
+      }>(`http://localhost:3000/api/connections/${userId}`, {
         withCredentials: true,
       });
 
       const { success, body } = response.data;
 
       if (success) {
-        setConnections(body);
+        setConnections(body.connections);
+        setIsLoggedIn(body.isLogin);
       } else {
         setError("Failed to fetch connections.");
       }
@@ -77,6 +59,10 @@ const ConnectionsList: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchConnections();
+  }, []);
 
   const handleConnection = async (toId: string, isConnected: boolean) => {
     setLoading(true);
@@ -102,7 +88,7 @@ const ConnectionsList: React.FC = () => {
         alert("Connection request sent.");
       }
 
-      fetchConnections(); 
+      fetchConnections();
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
         const { success, message } = err.response.data;
@@ -119,15 +105,8 @@ const ConnectionsList: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (isLoggedIn !== null) {
-      fetchConnections(); 
-    }
-  }, [userId, isLoggedIn]);
-
   return (
     <div style={{ padding: "20px" }}>
-      <h1>User Connections</h1>
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {!loading && !error && connections.length === 0 && (

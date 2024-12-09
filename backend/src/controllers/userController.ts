@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
+import jwt from "jsonwebtoken";
 
 const serializeUser = (user: any) => {
   return {
@@ -40,71 +41,30 @@ export const UserController = {
         },
       });
 
-      const usersWithConnectionStatus = users.map((user) => ({
-        ...serializeUser(user),
-        isConnected: false,
-      }));
-
-      res.status(200).json({
-        success: true,
-        message: "Users fetched successfully",
-        body: usersWithConnectionStatus,
-      });
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch users.",
-        error: error instanceof Error ? { message: error.message } : null,
-      });
-    }
-  },
-
-  getUsersLoggedIn: async (req: Request, res: Response) => {
-    const { search } = req.query;
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: User ID not available",
-      });
-    }
-
-    try {
-      const users = await prisma.user.findMany({
-        where: search
-          ? {
-              OR: [
-                {
-                  username: {
-                    contains: String(search),
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  full_name: {
-                    contains: String(search),
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            }
-          : {},
-        select: {
-          id: true,
-          username: true,
-          full_name: true,
-          profile_photo_path: true,
-        },
-      });
+      const isLogin = !!req.cookies.authToken;
+      let loggedInUserIdBigInt: bigint | undefined;
+      if (isLogin) {
+        const decoded = jwt.verify(
+          req.cookies.authToken,
+          process.env.JWT_SECRET || ""
+        );
+        req.user = decoded;
+        loggedInUserIdBigInt = BigInt(req.user.id);
+      }
 
       const usersWithConnectionStatus = await Promise.all(
         users.map(async (user) => {
-          const isConnected =
-            (await prisma.connection.count({
-              where: { from_id: BigInt(userId), to_id: BigInt(user.id) },
-            })) > 0;
+          let isConnected = false;
+
+          if (isLogin) {
+            const connectionExists = await prisma.connection.findFirst({
+              where: {
+                from_id: loggedInUserIdBigInt,
+                to_id: user.id,
+              },
+            });
+            isConnected = Boolean(connectionExists);
+          }
 
           return {
             ...user,
@@ -117,7 +77,7 @@ export const UserController = {
       res.status(200).json({
         success: true,
         message: "Users fetched successfully",
-        body: usersWithConnectionStatus,
+        body: { users: usersWithConnectionStatus, isLogin: isLogin },
       });
     } catch (error) {
       console.error("Error fetching users:", error);
