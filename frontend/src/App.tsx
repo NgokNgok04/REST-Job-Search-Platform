@@ -22,6 +22,7 @@ import Broh from "./components/Broh";
 import { getCookie } from "./utils/cookieHandler";
 import ChatRooms from "./components/ChatRooms";
 import Feed from "./Pages/FeedTest";
+import NotFound from "./components/NotFound";
 // import client from "./utils/axiosClient";
 
 function App() {
@@ -165,11 +166,21 @@ function App() {
             </Layout>
           }
         />
+        {auth && (
+          <Route
+            path="/feeds"
+            element={
+              <Layout>
+                <Feed />
+              </Layout>
+            }
+          />
+        )}
         <Route
-          path="/feeds"
+          path="*"
           element={
             <Layout>
-              <Feed />
+              <NotFound />
             </Layout>
           }
         />

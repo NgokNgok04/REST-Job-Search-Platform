@@ -48,7 +48,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIdUser(Number(user.id));
           setName(user.name ?? "");
           setProfile(user.profile_photo);
-          enableNotifications(Number(user.id));
+          if (idUser === 0) {
+            enableNotifications(Number(user.id));
+          }
         }
       } catch (error) {
         console.log(error);
