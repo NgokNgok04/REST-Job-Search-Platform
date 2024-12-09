@@ -2,85 +2,60 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
+import { Post } from "@/Pages/Feed";
 
 interface EditPostProps {
   postId: string;
-  onClose: () => void;
+  onClose: (updatedPost?: Post) => void;
 }
 
 const EditPost: React.FC<EditPostProps> = ({ postId, onClose }) => {
   const [content, setContent] = useState<string>("");
-  const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(`/api/feed/${postId}`, {
-          withCredentials: true,
-        });
-        setContent(response.data.content);
+        const response = await axios.get(
+          `http://localhost:3000/api/feed/${postId}`,
+          { withCredentials: true }
+        );
+        setContent(response.data.body.content);
       } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message || "Failed to fetch post.";
-        setError(errorMessage);
+        console.error("Failed to fetch post", error);
       }
     };
-
     fetchPost();
   }, [postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = content.trim();
-    if (trimmed.length > 280) {
-      setError("Content must be 280 characters or less.");
-      return;
-    }
-
     setIsSubmitting(true);
+
     try {
-      await axios.put(
+      const response = await axios.put(
         `http://localhost:3000/api/feed/${postId}`,
-        { trimmed },
+        { trimmed: content },
         { withCredentials: true }
       );
-      // Optionally, you can trigger a refetch of the feed here
+      const updatedPost = response.data.body;
+      onClose(updatedPost);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch users.";
-      setError(errorMessage);
+      console.error("Failed to update post", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="edit-post">
-      <form onSubmit={handleSubmit}>
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Edit your post..."
-          maxLength={280}
-          rows={4}
-          required
-        />
-        {error && <p className="error">{error}</p>}
-        <div className="flex justify-end mt-4">
-          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="ml-2"
-          >
-            {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <Textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        required
+      />
+      <Button disabled={isSubmitting}>Save Changes</Button>
+    </form>
   );
 };
 

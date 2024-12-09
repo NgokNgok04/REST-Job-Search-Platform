@@ -6,17 +6,20 @@ import ppJob from "/icons/phJob.png";
 import AddSkills from "./AddSkills";
 
 import { useParams } from "react-router-dom";
+import { Relevant_Post } from "@/Pages/Profile";
 interface SectionProps {
   section: string;
   work_history?: string;
   skills?: string;
   isOwner?: boolean;
+  posts?: Relevant_Post[];
 }
 export default function ProfileDetail({
   section,
   isOwner,
   work_history,
   skills,
+  posts,
 }: SectionProps) {
   const parsedWork = parseWorkHistory(work_history ?? "");
   const parsedSkills = parseSkills(skills ?? "");
@@ -90,11 +93,22 @@ export default function ProfileDetail({
           );
         })}
 
+      {posts &&
+        posts.map((data, idx) => {
+          return (
+            <div key={idx + "post"} className="flex flex-row mt-2 gap-2 pr-2">
+              <h1 className="text-sm font-semibold border-b-[1px] w-full py-2">
+                {data.content}
+              </h1>
+            </div>
+          );
+        })}
+
       {section == "Work History" && !work_history && (
         <div> No {section} yet</div>
       )}
       {section == "Skills" && !skills && <div> No {section} yet</div>}
-      {section == "Latest Posts" && <div> No {section} yet</div>}
+      {section == "Latest Posts" && !posts && <div> No {section} yet</div>}
     </div>
   );
 }

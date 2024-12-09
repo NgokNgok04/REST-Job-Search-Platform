@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
-import { serializeUsers } from "./userController";
-
+import jwt from "jsonwebtoken";
 
 const serializeConnectionAndRequest = (connection: any | any[]) => {
   const connections = Array.isArray(connection) ? connection : [connection];
@@ -56,6 +55,30 @@ export const ConnectionController = {
         });
       }
 
+      const alreadyRequesting = await prisma.connectionRequest.findFirst({
+        where: { from_id: loggedUser, to_id: BigInt(to_id) },
+      });
+
+      if (alreadyRequesting) {
+        return res.status(400).json({
+          success: false,
+          message: "You already send request to this user",
+          error: null,
+        });
+      }
+
+      const existingRequest = await prisma.connectionRequest.findFirst({
+        where: { from_id: BigInt(to_id), to_id: loggedUser },
+      });
+
+      if (existingRequest) {
+        return res.status(400).json({
+          success: false,
+          message: "This user waiting for your confirmation",
+          error: null,
+        });
+      }
+
       const request = await prisma.connectionRequest.create({
         data: {
           from_id: loggedUser,
@@ -93,11 +116,48 @@ export const ConnectionController = {
       const requests = await prisma.connectionRequest.findMany({
         where: { to_id: loggedUser },
         orderBy: { created_at: "desc" },
+        include: {
+          From: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              full_name: true,
+              profile_photo_path: true,
+            },
+          },
+        },
       });
 
-      res.status(200).json(serializeConnectionAndRequest(requests));
+      const serializedRequests = requests.map((request) => ({
+        request: {
+          from_id: request.from_id.toString(),
+          to_id: request.to_id.toString(),
+          created_at: request.created_at,
+        },
+        user: {
+          id: request.From.id.toString(),
+          username: request.From.username,
+          email: request.From.email,
+          full_name: request.From.full_name || "N/A",
+          profile_photo_path: request.From.profile_photo_path || null,
+        },
+      }));
+
+      res.status(200).json({
+        success: true,
+        message: "Connection requests fetched successfully",
+        body: serializedRequests,
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch connection requests." });
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch connection requests",
+        error:
+          error instanceof Error
+            ? { code: "SERVER_ERROR", details: error.message }
+            : null,
+      });
     }
   },
 
@@ -256,7 +316,7 @@ export const ConnectionController = {
   },
 
   getConnections: async (req: Request, res: Response) => {
-    const { userId } = req.params; // Ambil userId dari route parameter
+    const { userId } = req.params;
 
     if (!userId || isNaN(Number(userId))) {
       return res.status(400).json({
@@ -283,15 +343,45 @@ export const ConnectionController = {
         },
       });
 
+      const isLogin = !!req.cookies.authToken;
+      let loggedInUserIdBigInt: bigint | undefined;
+      if (isLogin) {
+        const decoded = jwt.verify(
+          req.cookies.authToken,
+          process.env.JWT_SECRET || ""
+        );
+        req.user = decoded;
+        loggedInUserIdBigInt = BigInt(req.user.id);
+      }
+
+      const userConnections = await Promise.all(
+        connections.map(async (connection) => {
+          let isConnected = false;
+
+          if (isLogin) {
+            const connectionExists = await prisma.connection.findFirst({
+              where: {
+                from_id: loggedInUserIdBigInt,
+                to_id: connection.To.id,
+              },
+            });
+            isConnected = Boolean(connectionExists);
+          }
+
+          return {
+            id: connection.To.id.toString(),
+            username: connection.To.username,
+            full_name: connection.To.full_name || "",
+            profile_photo_path: connection.To.profile_photo_path || null,
+            isConnected,
+          };
+        })
+      );
+
       res.status(200).json({
         success: true,
         message: "Connections fetched successfully",
-        body: connections.map((connection) => ({
-          id: connection.To.id.toString(),
-          username: connection.To.username,
-          full_name: connection.To.full_name || "N/A",
-          profile_photo_path: connection.To.profile_photo_path || null,
-        })),
+        body: { connections: userConnections, isLogin: isLogin },
       });
     } catch (error) {
       res.status(500).json({

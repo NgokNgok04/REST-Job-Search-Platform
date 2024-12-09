@@ -1,7 +1,4 @@
-// import React from "react";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -10,7 +7,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [isRegistered, setIsRegistered] = useState(false);
+
   const handleRegister = async () => {
     try {
       if (!username || !name || !email || !password || !confirmPassword) {
@@ -39,9 +36,7 @@ const RegisterPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setIsRegistered(true);
           console.log(data.message);
-          // console.log(data.user);
           console.log("response ok");
         } else {
           console.log("response not ok");
@@ -61,13 +56,15 @@ const RegisterPage = () => {
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="flex flex-col p-6 border rounded shadow-lg">
-        <h2 className="mb-4 text-2xl">Register</h2>
+      <div className="flex flex-col w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">
+          Register
+        </h2>
         {/* username */}
         <input
           type="text"
           placeholder="username"
-          className="p-2 mb-2 border rounded-sm"
+          className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
@@ -76,7 +73,7 @@ const RegisterPage = () => {
         <input
           type="email"
           placeholder="mail@gmail.com"
-          className="p-2 mb-2 border rounded-sm"
+          className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -85,7 +82,7 @@ const RegisterPage = () => {
         <input
           type="text"
           placeholder="name"
-          className="p-2 mb-2 border rounded-sm"
+          className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -94,7 +91,7 @@ const RegisterPage = () => {
         <input
           type="password"
           placeholder="password"
-          className="p-2 mb-2 border rounded-sm"
+          className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -103,14 +100,27 @@ const RegisterPage = () => {
         <input
           type="password"
           placeholder="confirm password"
-          className="p-2 mb-2 border rounded-sm"
+          className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        <button onClick={handleRegister}>Register</button>
-        {error && <p className="mt-2 text-red-500">{error}</p>}
-        {isRegistered && <Navigate to="/login" />}
+        <button
+          onClick={handleRegister}
+          className="w-full p-3 bg-[#0073b1] text-white font-semibold rounded-md shadow-md hover:bg-[#005c8c] transition duration-200"
+        >
+          Register
+        </button>
+        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">Already have an account?</p>
+          <a
+            href="/login"
+            className="text-sm text-[#0073b1] hover:text-[#005c8c]"
+          >
+            Sign in
+          </a>
+        </div>
       </div>
     </div>
   );

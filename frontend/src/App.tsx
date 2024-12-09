@@ -1,21 +1,29 @@
 // import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import "./App.css";
-import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/RegisterPage";
+import LoginPage from "./Pages/LoginPage";
+import RegisterPage from "./Pages/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
-import UsersList from "./components/UsersList";
-import ConnectionRequests from "./components/ConnectionRequest";
-import ConnectionsList from "./components/Connection";
+import UsersList from "./Pages/UsersList";
+import ConnectionRequests from "./Pages/ConnectionRequest";
+import ConnectionsList from "./Pages/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
-import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
-import Broh from "./components/Broh";
+import { getCookie } from "./utils/cookieHandler";
+import ChatRooms from "./components/ChatRooms";
+import Feed from "./Pages/Feed";
+import NotFound from "./components/NotFound";
 
 function App() {
+  const auth = getCookie("authToken");
   return (
     <Router>
       <Routes>
@@ -35,22 +43,73 @@ function App() {
             </Layout>
           }
         />
+        {auth ? (
+          <Route path="/" element={<Navigate to="/feeds" replace />} />
+        ) : (
+          <Route
+            path="/"
+            element={
+              <Layout cn="bg-white">
+                <Dashboard />
+              </Layout>
+            }
+          />
+        )}
+
         <Route
-          path="/"
+          path="/users"
           element={
             <Layout>
-              <Dashboard />
+              <UsersList />
+            </Layout>
+          }
+        />
+        <Route
+          path="/requests"
+          element={
+            <Layout>
+              <ConnectionRequests />
+            </Layout>
+          }
+        />
+        <Route
+          path="/connections/:userId"
+          element={
+            <Layout>
+              <ConnectionsList />
             </Layout>
           }
         />
 
-        <Route path="/users" element={<UsersList />} />
-        <Route path="/requests" element={<ConnectionRequests />} />
-        <Route path="/connections/:userId" element={<ConnectionsList />} />
+        <Route
+          path="/users"
+          element={
+            <Layout>
+              <UsersList />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/requests"
+          element={
+            <Layout>
+              <ConnectionRequests />
+            </Layout>
+          }
+        />
+        <Route
+          path="/connections/:userId"
+          element={
+            <Layout>
+              <ConnectionsList />
+            </Layout>
+          }
+        />
         <Route
           path="/profil/:id"
           element={
-            <Layout cn="">
+            <Layout>
               <ProfilPage />
             </Layout>
           }
@@ -72,27 +131,37 @@ function App() {
           }
         />
         <Route
-          path="/chat/:id" 
-          element = {
+          path="/chats"
+          element={
             <Layout>
-              <Chat/>  
+              <ChatRooms />
             </Layout>
           }
         />
         <Route
-          path="/test"
-          element = {
-            <Layout>
-              <Broh/>
-            </Layout>
-          }
-          />
-
-        <Route
-          path="/feeds"
+          path="/chat/:id"
           element={
             <Layout>
-              <FeedPage />
+              <Chat />
+            </Layout>
+          }
+        />
+
+        {auth && (
+          <Route
+            path="/feeds"
+            element={
+              <Layout>
+                <Feed />
+              </Layout>
+            }
+          />
+        )}
+        <Route
+          path="*"
+          element={
+            <Layout>
+              <NotFound />
             </Layout>
           }
         />

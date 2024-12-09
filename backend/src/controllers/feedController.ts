@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
+import { serializeUser } from "./userController";
 
 const serializePost = (post: any) => {
   return {
@@ -48,6 +49,17 @@ export const FeedController = {
           skip: 1,
           cursor: { id: cursorId },
         }),
+        include: {
+          User: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              full_name: true,
+              profile_photo_path: true,
+            },
+          },
+        },
       });
 
       const hasNextPage = posts.length > take;
@@ -59,7 +71,16 @@ export const FeedController = {
         success: true,
         message: "Successfully fetch feed",
         body: {
-          posts: posts.map((post) => serializePost(post)),
+          posts: posts.map((post) => ({
+            post: {
+              id: post.id.toString(),
+              content: post.content,
+              created_at: post.created_at.toISOString(),
+              updated_at: post.updated_at.toISOString(),
+            },
+            user: serializeUser(post.User),
+            isOwner: BigInt(userId) == post.user_id,
+          })),
           nextCursor: hasNextPage
             ? posts[posts.length - 1].id.toString()
             : null,
@@ -69,6 +90,69 @@ export const FeedController = {
       res.status(500).json({
         success: false,
         message: "Failed to fetch feed",
+        error: error instanceof Error ? error.message : null,
+      });
+    }
+  },
+
+  getPostById: async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    const { post_id } = req.params;
+
+    if (!userId || isNaN(Number(userId))) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not logged in",
+        error: null,
+      });
+    }
+
+    if (!post_id || isNaN(Number(post_id))) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post Id",
+        error: null,
+      });
+    }
+
+    try {
+      const postIdBigInt = BigInt(post_id);
+      const post = await prisma.feed.findFirst({
+        where: { id: postIdBigInt },
+      });
+
+      if (!post) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid post",
+          error: null,
+        });
+      }
+
+      const isFriend = await prisma.connection.findFirst({
+        where: {
+          from_id: post.user_id,
+          to_id: BigInt(userId),
+        },
+      });
+
+      if (BigInt(userId) != post.user_id && !isFriend) {
+        return res.status(400).json({
+          success: false,
+          message: "You are not authorized to see this feed",
+          error: null,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Post fetched successfully",
+        body: serializePost(post),
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to get post",
         error: error instanceof Error ? error.message : null,
       });
     }
@@ -105,7 +189,7 @@ export const FeedController = {
       res.status(201).json({
         success: true,
         message: "Post created successfully",
-        data: {
+        body: {
           ...post,
           id: post.id.toString(),
           user_id: post.user_id.toString(),

@@ -6,25 +6,39 @@ import Connection from "../models/Connection";
 const prisma = new PrismaClient();
 
 export const ProfileController = {
-  getAllProfiles: async (req: any, res: any) => {
+  getSelf: async (req: any, res: any) => {
     try {
-      const user = await prisma.user.findMany();
-      const payloadUser = user.map((user) => ({
-        id: user.id.toString(),
+      const isLogin = !!req.cookies.authToken;
+
+      if (!isLogin) {
+        responseAPI(res, 200, false, "User are not login!");
+        return;
+      }
+
+      const decoded = jwt.verify(
+        req.cookies.authToken,
+        process.env.JWT_SECRET || ""
+      );
+      req.user = decoded;
+
+      const user = await User.getUser(req.user.id);
+
+      if (!user) {
+        responseAPI(res, 200, false, "User not found");
+        return;
+      }
+      const data = {
         username: user.username,
-        email: user.email,
-        full_name: user.full_name,
-        profile_photo_path: user.profile_photo_path,
-        work_history: user.work_history,
-        skills: user.skills,
-      }));
-      res
-        .status(200)
-        .json({ status: true, message: "Test success", body: payloadUser });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, message: "Internal server error", body: null });
+        id: req.user.id,
+        name: user.full_name,
+        profile_photo: user.profile_photo_path,
+      };
+
+      responseAPI(res, 200, true, "Success get User Data", data);
+      return;
+    } catch (err: unknown) {
+      responseAPI(res, 500, false, "Internal Server Error", {});
+      return;
     }
   },
   getProfile: async (req: any, res: any) => {
@@ -68,10 +82,10 @@ export const ProfileController = {
       req.user = decoded;
 
       const posts = await User.getPosts(req.params.id);
+      data.relevant_posts = posts;
       if (req.user.id == req.params.id) {
         //Owner
         data.isOwner = true;
-        data.relevant_posts = posts;
         responseAPI(res, 200, true, "Success get Profile Owner", data);
         return;
       }
@@ -80,7 +94,7 @@ export const ProfileController = {
       const isConnected = await User.isConnected(req.user.id, req.params.id);
       data.isOwner = false;
       data.isConnected = isConnected;
-      responseAPI(res, 200, true, "Success get Profile Another People", data);
+      responseAPI(res, 200, true, "Success get Profile Another Peoples", data);
       return;
     } catch (err: unknown) {
       responseAPI(res, 500, false, "Internal Server Error", {});
@@ -91,31 +105,39 @@ export const ProfileController = {
       const { username, full_name, profile_photo_path, work_history, skills } =
         req.body;
       const file = req.file;
-
       if (username == "") {
         responseAPI(res, 200, true, "Username cant be empty");
         return;
       }
-
+      let path: string | null = "";
+      if (profile_photo_path && profile_photo_path == "undefined") {
+        path = null;
+      } else {
+        path = profile_photo_path;
+      }
       const profileData = {
         username: username,
         full_name: full_name,
         work_history: work_history,
-        profile_photo_path: profile_photo_path,
+        profile_photo_path: path,
         skills: skills,
       } as {
         username: string;
         full_name: string;
         work_history: string;
         skills: string;
-        profile_photo_path: string;
+        profile_photo_path: string | null;
       };
       if (file) {
-        profileData.profile_photo_path = `/store/${req.file.filename}`;
+        if (req.file.filename === "undefined") {
+          profileData.profile_photo_path = "/store/profile.png";
+        } else {
+          profileData.profile_photo_path = `/store/${req.file.filename}`;
+        }
       }
 
       User.setUser(req.params.id, profileData);
-      responseAPI(res, 200, true, "Profile updated successfuly");
+      responseAPI(res, 200, true, "Profile updated successfuly", profileData);
       return;
     } catch (err) {
       responseAPI(res, 500, false, "Internal Server Error");
