@@ -18,7 +18,8 @@ async function main() {
       ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Agile', 'Scrum', 'Kepemimpinan'],
       customFaker.number.int({ min: 1, max: 3 })
     ).join(', '),
-    profile_photo_path: customFaker.image.avatar(),
+    profile_photo_path: null,
+    // profile_photo_path: customFaker.image.avatar(),
   }));
 
   await prisma.user.createMany({ data: userData });
