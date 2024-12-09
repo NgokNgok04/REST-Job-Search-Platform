@@ -20,11 +20,11 @@ const debounce = (func: Function, delay: number) => {
     timer = setTimeout(() => func(...args), delay);
   };
 };
-
 const UsersList: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
+
   const toast = useToast();
 
   useEffect(() => {
@@ -32,7 +32,9 @@ const UsersList: React.FC = () => {
       try {
         const response = await axios.get(
           "http://localhost:3000/api/protected",
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
         setIsLoggedIn(response.data.success);
       } catch {
@@ -43,6 +45,8 @@ const UsersList: React.FC = () => {
   }, []);
 
   const fetchUsers = async (query: string = "") => {
+    if (isLoggedIn === null) return; 
+
     try {
       const api = isLoggedIn
         ? "http://localhost:3000/api/users-logged"
@@ -52,6 +56,7 @@ const UsersList: React.FC = () => {
         params: { search: query },
         withCredentials: true,
       });
+
       setUsers(response.data.body || []);
     } catch (error: any) {
       const errorMessage =
@@ -64,8 +69,13 @@ const UsersList: React.FC = () => {
     }
   };
 
-  const debouncedFetchUsers = useCallback(debounce(fetchUsers, 300), []);
+  useEffect(() => {
+    if (isLoggedIn !== null) {
+      fetchUsers();
+    }
+  }, [isLoggedIn]);
 
+  const debouncedFetchUsers = useCallback(debounce(fetchUsers, 300), []);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
     debouncedFetchUsers(e.target.value);
@@ -114,10 +124,6 @@ const UsersList: React.FC = () => {
       });
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, [isLoggedIn]);
 
   const handleAction = (userId: string, isConnected: boolean) => {
     if (isConnected) {

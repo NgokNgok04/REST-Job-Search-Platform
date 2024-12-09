@@ -7,7 +7,7 @@ import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
 import UsersList from "./Pages/UsersList";
 import ConnectionRequests from "./components/ConnectionRequest";
-import ConnectionsList from "./components/Connection";
+import ConnectionsList from "./Pages/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
@@ -52,9 +52,23 @@ function App() {
             </Layout>
           }
         />
-        
-        <Route path="/requests" element={<ConnectionRequests />} />
-        <Route path="/connections/:userId" element={<ConnectionsList />} />
+
+        <Route
+          path="/requests"
+          element={
+            <Layout>
+              <ConnectionRequests />
+            </Layout>
+          }
+        />
+        <Route
+          path="/connections/:userId"
+          element={
+            <Layout>
+              <ConnectionsList />
+            </Layout>
+          }
+        />
         <Route
           path="/profil/:id"
           element={
