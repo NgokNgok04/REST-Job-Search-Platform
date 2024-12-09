@@ -49,6 +49,83 @@ export const defineRoutes = (app: Express) => {
   });
 
   // User routes
+  /**
+   * @swagger
+   * /api/users:
+   *   get:
+   *     summary: Fetch a list of users with optional search.
+   *     description: Retrieve a list of users, optionally filtering by a search query. If logged in, the connection status with each user is also included.
+   *     tags:
+   *       - Users
+   *     parameters:
+   *       - in: query
+   *         name: search
+   *         schema:
+   *           type: string
+   *         required: false
+   *         description: A search term to filter users by username or full name.
+   *         example: "John"
+   *     responses:
+   *       200:
+   *         description: Successfully fetched users.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Users fetched successfully"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     users:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           id:
+   *                             type: string
+   *                             example: "123"
+   *                           username:
+   *                             type: string
+   *                             example: "johndoe"
+   *                           full_name:
+   *                             type: string
+   *                             example: "John Doe"
+   *                           profile_photo_path:
+   *                             type: string
+   *                             example: "/path/to/photo.jpg"
+   *                           isConnected:
+   *                             type: boolean
+   *                             example: true
+   *                     isLogin:
+   *                       type: boolean
+   *                       example: true
+   *       500:
+   *         description: Internal server error while fetching users.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to fetch users."
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   properties:
+   *                     message:
+   *                       type: string
+   *                       example: "Database operation failed"
+   */
   app.get("/api/users", UserController.getUsers);
 
   /**
@@ -93,8 +170,7 @@ export const defineRoutes = (app: Express) => {
    *                   type: string
    *                   nullable: true
    *                   example: null
-  */
-
+   */
   app.get(
     "/api/logged-id,",
     AuthMiddleware.authorization,
@@ -103,7 +179,7 @@ export const defineRoutes = (app: Express) => {
 
   /**
    * @swagger
-   * api/connection-request:
+  //  * api/connections/requests:
    *   post:
    *     summary: Send a connection request
    *     description: Allows a logged-in user to send a connection request to another user.
@@ -198,141 +274,144 @@ export const defineRoutes = (app: Express) => {
    *                     details:
    *                       type: string
    *                       example: "Error details here"
-  */
+   */
   app.post(
     "/api/connections/request",
     AuthMiddleware.authorization,
     ConnectionController.sendConnectionRequest
   );
 
-    /**
-     * @swagger
-     * api/connections/pending:
-     *   get:
-     *     summary: Get pending connection requests
-     *     description: Fetches all pending connection requests for the logged-in user, ordered by the most recent.
-     *     tags:
-     *       - Connection
-     *     responses:
-     *       200:
-     *         description: Successfully fetched pending connection requests.
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 success:
-     *                   type: boolean
-     *                   example: true
-     *                 message:
-     *                   type: string
-     *                   example: "Connection requests fetched successfully"
-     *                 body:
-     *                   type: array
-     *                   items:
-     *                     type: object
-     *                     properties:
-     *                       request:
-     *                         type: object
-     *                         properties:
-     *                           from_id:
-     *                             type: string
-     *                             example: "12345"
-     *                           to_id:
-     *                             type: string
-     *                             example: "67890"
-     *                           created_at:
-     *                             type: string
-     *                             format: date-time
-     *                             example: "2024-12-08T12:34:56Z"
-     *                       user:
-     *                         type: object
-     *                         properties:
-     *                           id:
-     *                             type: string
-     *                             example: "12345"
-     *                           username:
-     *                             type: string
-     *                             example: "johndoe"
-     *                           email:
-     *                             type: string
-     *                             example: "johndoe@example.com"
-     *                           full_name:
-     *                             type: string
-     *                             example: "John Doe"
-     *                           profile_photo_path:
-     *                             type: string
-     *                             nullable: true
-     *                             example: "/uploads/profile/johndoe.jpg"
-     *       401:
-     *         description: Unauthorized; user is not logged in.
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 message:
-     *                   type: string
-     *                   example: "Unauthorized: Missing userId"
-     *       500:
-     *         description: Internal server error while processing the request.
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 success:
-     *                   type: boolean
-     *                   example: false
-     *                 message:
-     *                   type: string
-     *                   example: "Failed to fetch connection requests"
-     *                 error:
-     *                   type: object
-     *                   nullable: true
-     *                   properties:
-     *                     code:
-     *                       type: string
-     *                       example: "SERVER_ERROR"
-     *                     details:
-     *                       type: string
-     *                       example: "Database connection failed"
-    */
+  /**
+   * @swagger
+   * api/connections/pending:
+   *   get:
+   *     summary: Get pending connection requests
+   *     description: Fetches all pending connection requests for the logged-in user, ordered by the most recent.
+   *     tags:
+   *       - Connection
+   *     responses:
+   *       200:
+   *         description: Successfully fetched pending connection requests.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Connection requests fetched successfully"
+   *                 body:
+   *                   type: array
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       request:
+   *                         type: object
+   *                         properties:
+   *                           from_id:
+   *                             type: string
+   *                             example: "12345"
+   *                           to_id:
+   *                             type: string
+   *                             example: "67890"
+   *                           created_at:
+   *                             type: string
+   *                             format: date-time
+   *                             example: "2024-12-08T12:34:56Z"
+   *                       user:
+   *                         type: object
+   *                         properties:
+   *                           id:
+   *                             type: string
+   *                             example: "12345"
+   *                           username:
+   *                             type: string
+   *                             example: "johndoe"
+   *                           email:
+   *                             type: string
+   *                             example: "johndoe@example.com"
+   *                           full_name:
+   *                             type: string
+   *                             example: "John Doe"
+   *                           profile_photo_path:
+   *                             type: string
+   *                             nullable: true
+   *                             example: "/uploads/profile/johndoe.jpg"
+   *       401:
+   *         description: Unauthorized; user is not logged in.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: Missing userId"
+   *       500:
+   *         description: Internal server error while processing the request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to fetch connection requests"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   properties:
+   *                     code:
+   *                       type: string
+   *                       example: "SERVER_ERROR"
+   *                     details:
+   *                       type: string
+   *                       example: "Database connection failed"
+   */
   app.get(
     "/api/connections/requests",
     AuthMiddleware.authorization,
     ConnectionController.getPendingRequests
   );
-    
-    /**
+
+  /**
    * @swagger
-   * api/connections/respond:
+   * /api/connections/respond:
    *   post:
-   *     summary: Respond to a connection request
-   *     description: Allows the logged-in user to accept or reject a pending connection request.
+   *     summary: Respond to a connection request.
+   *     description: Accepts or rejects a connection request sent to the logged-in user.
    *     tags:
-   *       - Connection
+   *       - Connections
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
    *             type: object
+   *             required:
+   *               - to_id
+   *               - action
    *             properties:
    *               to_id:
    *                 type: string
    *                 description: The ID of the user who sent the connection request.
-   *                 example: "12345"
+   *                 example: "123"
    *               action:
    *                 type: string
-   *                 description: The action to perform on the request. Allowed values: 'accept' or 'reject'.
+   *                 description: The action to perform on the connection request.
    *                 enum:
    *                   - accept
    *                   - reject
    *                 example: "accept"
    *     responses:
    *       200:
-   *         description: Connection request processed successfully.
+   *         description: Successfully processed the connection request.
    *         content:
    *           application/json:
    *             schema:
@@ -347,9 +426,8 @@ export const defineRoutes = (app: Express) => {
    *                 body:
    *                   type: object
    *                   nullable: true
-   *                   example: null
    *       400:
-   *         description: Bad request due to invalid or missing parameters.
+   *         description: Bad request due to missing or invalid parameters.
    *         content:
    *           application/json:
    *             schema:
@@ -364,9 +442,8 @@ export const defineRoutes = (app: Express) => {
    *                 error:
    *                   type: object
    *                   nullable: true
-   *                   example: null
    *       401:
-   *         description: Unauthorized; user is not logged in.
+   *         description: Unauthorized due to missing or invalid authentication.
    *         content:
    *           application/json:
    *             schema:
@@ -381,9 +458,8 @@ export const defineRoutes = (app: Express) => {
    *                 error:
    *                   type: object
    *                   nullable: true
-   *                   example: null
    *       404:
-   *         description: Request not found.
+   *         description: Connection request not found.
    *         content:
    *           application/json:
    *             schema:
@@ -398,9 +474,7 @@ export const defineRoutes = (app: Express) => {
    *                 error:
    *                   type: object
    *                   nullable: true
-   *                   example: null
-   * 
-   *      500:
+   *       500:
    *         description: Internal server error while processing the request.
    *         content:
    *           application/json:
@@ -415,14 +489,13 @@ export const defineRoutes = (app: Express) => {
    *                   example: "Failed to process connection request."
    *                 error:
    *                   type: object
-   *                   nullable: true
    *                   properties:
    *                     code:
    *                       type: string
    *                       example: "SERVER_ERROR"
    *                     details:
    *                       type: string
-   *                       example: "Database connection failed"
+   *                       example: "Database operation failed"
    */
   app.post(
     "/api/connections/respond",
@@ -430,7 +503,6 @@ export const defineRoutes = (app: Express) => {
     ConnectionController.respondToRequest
   );
 
-  
   /**
    * @swagger
    * api/connections/{userId}:
@@ -531,7 +603,6 @@ export const defineRoutes = (app: Express) => {
    *                       example: "Database connection failed"
    */
   app.get("/api/connections/:userId", ConnectionController.getConnections);
-
 
   /**
    * @swagger
@@ -645,28 +716,548 @@ export const defineRoutes = (app: Express) => {
   );
 
   // FEED ROUTES
-
+  /**
+ * @swagger
+ * /api/feed:
+ *   get:
+ *     summary: Fetches the user's feed based on their connections.
+ *     description: Retrieves a feed of posts for the user and their connections, with pagination support.
+ *     tags:
+ *       - Feed
+ *     parameters:
+ *       - in: query
+ *         name: cursor
+ *         description: The cursor for pagination (used for fetching the next set of posts).
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         description: The number of posts to fetch.
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Successfully fetched feed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Successfully fetch feed
+ *                 body:
+ *                   type: object
+ *                   properties:
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           post:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 example: "123"
+ *                               content:
+ *                                 type: string
+ *                                 example: "This is a sample post."
+ *                               created_at:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 example: "2024-12-09T12:00:00Z"
+ *                               updated_at:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 example: "2024-12-09T12:05:00Z"
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 example: "user123"
+ *                               username:
+ *                                 type: string
+ *                                 example: "johndoe"
+ *                               email:
+ *                                 type: string
+ *                                 example: "john.doe@example.com"
+ *                               full_name:
+ *                                 type: string
+ *                                 example: "John Doe"
+ *                               profile_photo_path:
+ *                                 type: string
+ *                                 example: "/path/to/profile/photo.jpg"
+ *                           isOwner:
+ *                             type: boolean
+ *                             example: false
+ *                     nextCursor:
+ *                       type: string
+ *                       example: "124"
+ *       401:
+ *         description: Unauthorized: User not logged in or invalid token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized: User not logged in
+       500:
+ *         description: Internal server error while fetching the feed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Failed to fetch feed
+ *                 error:
+ *                   type: string
+ *                   example: "Database operation failed"
+ */
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
+
+  /**
+   * @swagger
+   * /api/feed/{post_id}:
+   *   get:
+   *     summary: Fetches a specific post by its ID.
+   *     description: Retrieves a single post by its ID, with authorization checks based on user connection status.
+   *     tags:
+   *       - Feed
+   *     parameters:
+   *       - in: path
+   *         name: post_id
+   *         required: true
+   *         description: The ID of the post to fetch.
+   *         schema:
+   *           type: string
+   *           example: "123"
+   *     responses:
+   *       200:
+   *         description: Successfully fetched post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Post fetched successfully"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     post:
+   *                       type: object
+   *                       properties:
+   *                         id:
+   *                           type: string
+   *                           example: "123"
+   *                         content:
+   *                           type: string
+   *                           example: "This is a sample post content."
+   *                         created_at:
+   *                           type: string
+   *                           format: date-time
+   *                           example: "2024-12-09T12:00:00Z"
+   *                         updated_at:
+   *                           type: string
+   *                           format: date-time
+   *                           example: "2024-12-09T12:05:00Z"
+   *                         user:
+   *                           type: object
+   *                           properties:
+   *                             id:
+   *                               type: string
+   *                               example: "user123"
+   *                             username:
+   *                               type: string
+   *                               example: "johndoe"
+   *                             email:
+   *                               type: string
+   *                               example: "john.doe@example.com"
+   *                             full_name:
+   *                               type: string
+   *                               example: "John Doe"
+   *                             profile_photo_path:
+   *                               type: string
+   *                               example: "/path/to/profile/photo.jpg"
+   *       400:
+   *         description: Invalid post ID or user not authorized to view the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Invalid post" or "You are not authorized to see this feed"
+   *       401:
+   *         description: Unauthorized error due to missing or invalid user authentication.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: User not logged in"
+   *       500:
+   *         description: Internal server error while fetching the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to get post"
+   *                 error:
+   *                   type: string
+   *                   example: "Database operation failed"
+   */
   app.get(
     "/api/feed/:post_id",
     AuthMiddleware.authorization,
     FeedController.getPostById
   );
-  app.get(
-    "/api/feed/:post_id",
-    AuthMiddleware.authorization,
-    FeedController.getPostById
-  );
+
+  /**
+   * @swagger
+   * /api/feed:
+   *   post:
+   *     summary: Create a new post.
+   *     description: Allows the authenticated user to create a new post with up to 280 characters.
+   *     tags:
+   *       - Feed
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               content:
+   *                 type: string
+   *                 description: The content of the post (up to 280 characters).
+   *                 example: "This is a new post!"
+   *     responses:
+   *       201:
+   *         description: Post created successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Post created successfully"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     id:
+   *                       type: string
+   *                       example: "12345"
+   *                     content:
+   *                       type: string
+   *                       example: "This is a new post!"
+   *                     user_id:
+   *                       type: string
+   *                       example: "user123"
+   *       400:
+   *         description: Bad request due to invalid or missing parameters.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Content must not exceed 280 characters"
+   *       401:
+   *         description: Unauthorized error due to missing or invalid authentication.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: User not logged in"
+   *       500:
+   *         description: Internal server error while creating the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to create post"
+   *                 error:
+   *                   type: string
+   *                   example: "Database operation failed"
+   */
   app.post(
     "/api/feed",
     AuthMiddleware.authorization,
     FeedController.createPost
   );
+
+  /**
+   * @swagger
+   * /api/feed/{post_id}:
+   *   put:
+   *     summary: Update an existing post.
+   *     description: Allows the authenticated user to update their own post, provided the post exists and the user is the owner.
+   *     tags:
+   *       - Feed
+   *     parameters:
+   *       - in: path
+   *         name: post_id
+   *         required: true
+   *         description: The ID of the post to update.
+   *         schema:
+   *           type: string
+   *           example: "12345"
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               trimmed:
+   *                 type: string
+   *                 description: The new content for the post (up to 280 characters).
+   *                 example: "This is the updated content of the post!"
+   *     responses:
+   *       200:
+   *         description: Post updated successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Post updated successfully"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     id:
+   *                       type: string
+   *                       example: "12345"
+   *                     content:
+   *                       type: string
+   *                       example: "This is the updated content of the post!"
+   *                     user_id:
+   *                       type: string
+   *                       example: "user123"
+   *       400:
+   *         description: Bad request due to invalid content or missing parameters.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "trimmed must not exceed 280 characters"
+   *       401:
+   *         description: Unauthorized error due to missing or invalid authentication.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: User not logged in"
+   *       403:
+   *         description: Forbidden if the user is not the owner of the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "You are not authorized to edit this post"
+   *       404:
+   *         description: Not found if the post ID does not exist.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Post not found"
+   *       500:
+   *         description: Internal server error while updating the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to update post"
+   *                 error:
+   *                   type: string
+   *                   example: "Database operation failed"
+   */
   app.put(
     "/api/feed/:post_id",
     AuthMiddleware.authorization,
     FeedController.updatePost
   );
+
+  /**
+   * @swagger
+   * /api/feed/{post_id}:
+   *   delete:
+   *     summary: Delete a post.
+   *     description: Allows the authenticated user to delete their own post.
+   *     tags:
+   *       - Feed
+   *     parameters:
+   *       - in: path
+   *         name: post_id
+   *         required: true
+   *         description: The ID of the post to delete.
+   *         schema:
+   *           type: string
+   *           example: "12345"
+   *     responses:
+   *       200:
+   *         description: Post deleted successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Post deleted successfully"
+   *       401:
+   *         description: Unauthorized error due to missing or invalid authentication.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: User not logged in"
+   *       403:
+   *         description: Forbidden if the user is not the owner of the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "You are not authorized to delete this post"
+   *       404:
+   *         description: Not found if the post ID does not exist.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Post not found"
+   *       500:
+   *         description: Internal server error while deleting the post.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to delete post"
+   *                 error:
+   *                   type: string
+   *                   example: "Database operation failed"
+   */
   app.delete(
     "/api/feed/:post_id",
     AuthMiddleware.authorization,
