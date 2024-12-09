@@ -84,15 +84,57 @@ const ChatRooms: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center text-gray-500">Loading...</div>;
+    return  (
+    <div className="text-center text-gray-600 text-lg font-medium">
+      Loading...
+    </div>
+    )
   }
 
   if (error) {
-    return <div className="text-center text-red-500">Error: {error}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#f3f6f9]">
+      <div className="bg-white p-10 rounded-lg shadow-lg max-w-lg w-full text-center">
+        <h3 className="text-3xl font-semibold text-[#0073b1] mb-6">
+          You can't chat right now
+        </h3>
+        <p className="text-lg text-gray-600 mb-6">
+          It seems you haven't chat anyone yet. Start a chat with someone to see them here.
+        </p>
+        <div className="mt-8">
+          <a
+            href="/"
+            className="inline-block w-full px-6 py-3 bg-[#0073b1] text-white font-semibold rounded-lg shadow-lg hover:bg-[#005c8c] transition duration-200"
+          >
+            Go to Home
+          </a>
+        </div>
+      </div>
+    </div>
+    )
   }
 
   if (chatRooms.length === 0) {
-    return <div className="text-center text-gray-500">No chat rooms found</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#f3f6f9]">
+        <div className="bg-white p-10 rounded-lg shadow-lg max-w-lg w-full text-center">
+          <h3 className="text-3xl font-semibold text-[#0073b1] mb-6">
+            You can't chat right now
+          </h3>
+          <p className="text-lg text-gray-600 mb-6">
+            It seems you haven't chat anyone yet. Start a chat with someone to see them here.
+          </p>
+          <div className="mt-8">
+            <a
+              href="/"
+              className="inline-block w-full px-6 py-3 bg-[#0073b1] text-white font-semibold rounded-lg shadow-lg hover:bg-[#005c8c] transition duration-200"
+            >
+              Go to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
