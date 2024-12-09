@@ -21,7 +21,7 @@ const LoginPage = () => {
         setError(response.message);
       } else {
         localStorage.setItem("token", response.body.token);
-        navigate("/");
+        navigate("/feeds");
       }
     } catch (err) {
       if (err) {

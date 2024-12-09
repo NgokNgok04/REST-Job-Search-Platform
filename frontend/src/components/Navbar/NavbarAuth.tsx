@@ -1,22 +1,32 @@
-import { getCookie } from "@/utils/cookieHandler";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Fragment } from "react/jsx-runtime";
+import { useAuth } from "@/contexts/authContext";
 
 export default function NavbarAuth() {
-  const auth = getCookie("authToken");
   const location = useLocation();
-
+  const navigate = useNavigate();
+  const { idUser, isLogin, logout, username, profile_photo } = useAuth();
   let isPublic;
   if (
-    auth == null ||
+    !isLogin ||
     location.pathname == "/login" ||
     location.pathname == "/register"
   ) {
     isPublic = true;
   } else {
     isPublic = false;
+  }
+  async function handleLogout() {
+    try {
+      const response = await logout();
+      if (response.status) {
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
   return (
     <Fragment>
@@ -39,15 +49,15 @@ export default function NavbarAuth() {
             <PopoverContent align="end" sideOffset={15}>
               <div className="flex gap-2 mb-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src="/profile.png" />
+                  <AvatarImage src={profile_photo ?? "/profile.png"} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <div className="text-left">
-                  <h1 className="font-medium text-lg">{"username"}</h1>
+                  <h1 className="font-medium text-lg">{username}</h1>
                 </div>
               </div>
               <Link
-                to={`/profile/${"currentId"}`}
+                to={`/profil/${idUser}`}
                 className="block mb-3 text-linkin-blue font-semibold border border-linkin-blue rounded-xl px-2 text-center transition-all duration-100 ease-in hover:ring-linkin-dark-blue hover:ring-2 hover:bg-linkin-hoverblue"
               >
                 View Profile
@@ -55,7 +65,7 @@ export default function NavbarAuth() {
               <div className="text-gray-600">
                 <button
                   className="w-full text-left hover:underline"
-                  // onClick={handleLogout}
+                  onClick={() => handleLogout()}
                 >
                   Logout
                 </button>

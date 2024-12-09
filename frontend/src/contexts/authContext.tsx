@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchUser = async () => {
       try {
         const user = await UserAPI.getSelf();
-        if (user) {
+        if (user.username) {
           setIsLogin(true);
           setUsername(user.username);
           setIdUser(Number(user.id));
@@ -50,10 +50,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchUser();
-  }, [update, idUser]);
+  }, [update]);
 
   async function login(payload: LoginProps) {
     const response = await UserAPI.login(payload);
+    setIsLogin(true);
     setUpdate((prev) => !prev);
     return response;
   }

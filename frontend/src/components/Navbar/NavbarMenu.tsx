@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { getCookie } from "@/utils/cookieHandler";
 import HomeIcon from "./HomeIcon";
 import GroupIcon from "./GroupIcon";
 import { ClockIcon, UserGroupIcon } from "@heroicons/react/24/solid";
@@ -9,9 +8,8 @@ import { Fragment } from "react/jsx-runtime";
 import { useAuth } from "@/contexts/authContext";
 
 export default function NavbarMenu() {
-  const auth = getCookie("authToken");
   const location = useLocation();
-  const { idUser, name, isLogin, username } = useAuth();
+  const { idUser, isLogin } = useAuth();
   const menuBeforeLogin = [
     {
       path: "/users",
@@ -24,7 +22,6 @@ export default function NavbarMenu() {
       icon: <HomeIcon />,
     },
   ];
-  console.log("IDDD USERRRR", idUser, name, isLogin, username);
   const menuAfterLogin = [
     {
       path: `/connections/${idUser}`,
@@ -50,12 +47,15 @@ export default function NavbarMenu() {
 
   let isPublic;
   if (
-    auth == null ||
+    !isLogin ||
     location.pathname == "/login" ||
     location.pathname == "/register"
   ) {
+    console.log("ispublic true");
     isPublic = true;
   } else {
+    console.log(isLogin);
+    console.log("ispublic false");
     isPublic = false;
   }
   const paths = isPublic

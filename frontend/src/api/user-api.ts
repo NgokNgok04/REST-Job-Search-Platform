@@ -8,7 +8,7 @@ export const UserAPI = {
       const response = await client.get("/profil/self");
       return response.data.body;
     } catch (error) {
-      throw (error as any)?.response?.data;
+      throw (error as any)?.response?.data.body;
     }
   },
   getUserData: async (userId: number) => {
