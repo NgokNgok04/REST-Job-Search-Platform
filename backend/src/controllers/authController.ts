@@ -93,18 +93,30 @@ export const AuthController = {
   },
 
   signin: async (req: any, res: any) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { identifier, password } = req.body;
+    if (!identifier || !password) {
       responseAPI(res, 400, false, "All fields are required");
       return;
     }
 
     try {
-      const user = await prisma.user.findUnique({
+      
+      const userwithusername = await prisma.user.findUnique({
         where: {
-          email: email,
+          username: identifier,
         },
-      });
+      })
+      let user = null;
+      if(userwithusername){
+        user = userwithusername;
+      }
+      else{
+        user = await prisma.user.findUnique({
+          where: {
+            email: identifier,
+          },
+        });
+      }
 
       if (!user) {
         responseAPI(res, 400, false, "Email or Password is wrong", {token: null});
