@@ -8,8 +8,7 @@ import { useParams } from "react-router-dom";
 import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
 import EditPP from "@/components/Profile/EditPP";
-import { enableNotifications } from "@/utils/notifications";
-
+import { useAuth } from "@/contexts/authContext";
 export type ProfileResponse = {
   status: boolean;
   message: string;
@@ -53,6 +52,7 @@ const dummyData = {
 export default function ProfilPage() {
   const { id } = useParams();
   const [reloadKey, setReloadKey] = useState(0);
+  const { isLogin } = useAuth();
   const [isUserFound, setIsUserFound] = useState<boolean>(true);
   const [profileData, setProfileData] = useState<ProfileResponse | null>({
     status: true,
@@ -88,7 +88,11 @@ export default function ProfilPage() {
   }, [id, reloadKey]);
 
   async function handleClickConnect() {
-    enableNotifications(Number(id));
+    // TO DO
+  }
+
+  function handleClickMessage() {
+    // TO DO
   }
 
   if (!isUserFound) {
@@ -132,16 +136,41 @@ export default function ProfilPage() {
           </h1>
         </div>
 
-        {!profileData?.body.isConnected && !profileData?.body.isOwner && (
-          <button
-            className="mx-5 mt-2 mb-4 bg-[#0A66C2] text-white px-4 py-1 rounded-full"
-            onClick={() => {
-              handleClickConnect();
-            }}
-          >
-            Connect
-          </button>
-        )}
+        {!profileData?.body.isConnected &&
+          !profileData?.body.isOwner &&
+          isLogin && (
+            <button
+              className="hover:bg-[#004182] mx-5 mt-2 mb-4 bg-[#0A66C2] text-white px-4 py-1 rounded-full"
+              onClick={() => {
+                handleClickConnect();
+              }}
+            >
+              Connect
+            </button>
+          )}
+
+        {profileData?.body.isConnected &&
+          !profileData?.body.isOwner &&
+          isLogin && (
+            <div>
+              <button
+                className="hover:bg-[#004182] hover:border-[#004182] mx-5 mt-2 mb-4 bg-[#0A66C2] text-white border-[#0A66C2] border-[2px] px-4 py-1 rounded-full"
+                onClick={() => {
+                  handleClickMessage();
+                }}
+              >
+                Message
+              </button>
+              <button
+                className="hover:bg-[#F3F3F3] hover:border-black mt-2 mb-4 bg-white text-[#404040] border-[#404040] border-[2px] px-4 py-1 rounded-full"
+                onClick={() => {
+                  handleClickConnect();
+                }}
+              >
+                Unconnect
+              </button>
+            </div>
+          )}
       </div>
       <ProfileDetail
         work_history={profileData?.body.work_history}

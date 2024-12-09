@@ -1,5 +1,6 @@
 import { UserAPI } from "@/api/user-api";
 import { APIResponse, LoginProps } from "@/types";
+import { enableNotifications } from "@/utils/notifications";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type AuthContext = {
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIdUser(Number(user.id));
           setName(user.name ?? "");
           setProfile(user.profile_photo);
+          enableNotifications(Number(user.id));
         }
       } catch (error) {
         console.log(error);
