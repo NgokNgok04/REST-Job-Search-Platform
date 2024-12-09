@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
-import Navbar from "./Navbar";
+import Navbar from "./Navbar/Navbar";
+import { AuthProvider } from "@/contexts/authContext";
 import { Toaster } from "./ui/toaster";
 
 type LayoutProps = {
@@ -10,9 +11,11 @@ type LayoutProps = {
 const Layout: React.FC<LayoutProps> = ({ cn, children }) => {
   return (
     <div className={`flex flex-col min-h-screen max-h-screen  ${cn}`}>
-      <Navbar />
-      <main className="mt-[70px] px-10">{children}</main>
-      <Toaster />
+      <AuthProvider>
+        <Navbar />
+        <main className="px-10 ">{children}</main>
+        <Toaster />
+      </AuthProvider>
     </div>
   );
 };

@@ -13,20 +13,21 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import clientFormData from "@/utils/axiosImage";
 import client from "@/utils/axiosClient";
+// import { useAuth } from "@/contexts/authContext";
 
 interface EditPPProps {
   photo: string;
+  onChange: () => void;
 }
-export default function EditPP({ photo }: EditPPProps) {
+export default function EditPP({ photo, onChange }: EditPPProps) {
   const [image, setImage] = useState<File | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { id } = useParams();
 
   async function handleDelete() {
-    console.log("MASUK DELETES");
     try {
       const response = await client.put(`/profil/${id}`, {
-        profile_photo_path: image?.name,
+        profile_photo_path: "undefined",
       });
       if (response.status != 200) {
         console.log("SALAH BANG");
@@ -34,7 +35,7 @@ export default function EditPP({ photo }: EditPPProps) {
         setImage(null);
       }
       console.log("RESPONSE : ", response.data);
-      window.location.reload();
+      // window.location.reload();
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         console.error(err.response?.data?.message || "Failed to fetch profile");
@@ -43,7 +44,6 @@ export default function EditPP({ photo }: EditPPProps) {
       }
     }
   }
-
   useEffect(() => {
     try {
       if (!image) {
@@ -55,17 +55,22 @@ export default function EditPP({ photo }: EditPPProps) {
       formData.append("profile_photo_path", image);
 
       console.log(image);
+      console.log(JSON.stringify(formData));
       async function handleSubmit() {
         const response = await clientFormData.put(`/profil/${id}`, formData);
         if (response.status != 200) {
           console.log("SALAH BANG");
         } else {
           console.log("BERHASIL BOS");
+          setIsOpen(false);
+          onChange();
+
+          console.log("berhasil update");
         }
         console.log("RESPONSE : ", response.data);
       }
+
       handleSubmit();
-      window.location.reload();
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         console.error(err.response?.data?.message || "Failed to fetch profile");

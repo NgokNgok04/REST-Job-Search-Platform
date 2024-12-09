@@ -1,8 +1,13 @@
 // import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import "./App.css";
-import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/RegisterPage";
+import LoginPage from "./Pages/LoginPage";
+import RegisterPage from "./Pages/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
 import UsersList from "./Pages/UsersList";
@@ -14,8 +19,12 @@ import Skills from "./components/Profile/Skills";
 import FeedPage from "./Pages/Feeds";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
+import { getCookie } from "./utils/cookieHandler";
+import ChatRooms from "./components/ChatRooms";
+// import client from "./utils/axiosClient";
 
 function App() {
+  const auth = getCookie("authToken");
   return (
     <Router>
       <Routes>
@@ -35,11 +44,40 @@ function App() {
             </Layout>
           }
         />
+        {auth ? (
+          <Route path="/" element={<Navigate to="/feeds" replace />} />
+        ) : (
+          <Route
+            path="/"
+            element={
+              <Layout cn="bg-white">
+                <Dashboard />
+              </Layout>
+            }
+          />
+        )}
+
         <Route
-          path="/"
+          path="/users"
           element={
             <Layout>
-              <Dashboard />
+              <UsersList />
+            </Layout>
+          }
+        />
+        <Route
+          path="/requests"
+          element={
+            <Layout>
+              <ConnectionRequests />
+            </Layout>
+          }
+        />
+        <Route
+          path="/connections/:userId"
+          element={
+            <Layout>
+              <ConnectionsList />
             </Layout>
           }
         />
@@ -72,7 +110,7 @@ function App() {
         <Route
           path="/profil/:id"
           element={
-            <Layout cn="">
+            <Layout>
               <ProfilPage />
             </Layout>
           }
@@ -90,6 +128,14 @@ function App() {
           element={
             <Layout>
               <Skills />
+            </Layout>
+          }
+        />
+        <Route
+          path="/chats"
+          element={
+            <Layout>
+              <ChatRooms />
             </Layout>
           }
         />

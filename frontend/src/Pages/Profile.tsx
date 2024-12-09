@@ -8,8 +8,9 @@ import { useParams } from "react-router-dom";
 import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
 import EditPP from "@/components/Profile/EditPP";
+import { enableNotifications } from "@/utils/notifications";
 
-type ProfileResponse = {
+export type ProfileResponse = {
   status: boolean;
   message: string;
   body: {
@@ -51,6 +52,7 @@ const dummyData = {
 
 export default function ProfilPage() {
   const { id } = useParams();
+  const [reloadKey, setReloadKey] = useState(0);
   const [isUserFound, setIsUserFound] = useState<boolean>(true);
   const [profileData, setProfileData] = useState<ProfileResponse | null>({
     status: true,
@@ -83,11 +85,20 @@ export default function ProfilPage() {
       }
       setIsUserFound(false);
     }
-  }, [id]);
+  }, [id, reloadKey]);
+
+  async function handleClickConnect() {
+    enableNotifications(Number(id));
+  }
 
   if (!isUserFound) {
     return <NotFound />;
   }
+
+  const handleReload = () => {
+    setReloadKey((prevKey) => prevKey + 1);
+  };
+
   return (
     <div className="flex flex-col items-center mt-4 border-1 w-full gap-4">
       <div className="bg-white rounded-lg pb-4">
@@ -98,7 +109,9 @@ export default function ProfilPage() {
             alt="Background Image"
           />
           <EditPP
+            key={reloadKey}
             photo={profileData?.body.profile_photo ?? "/store" + profil}
+            onChange={handleReload}
           />
         </div>
         {profileData?.body.isOwner && (
@@ -120,7 +133,12 @@ export default function ProfilPage() {
         </div>
 
         {!profileData?.body.isConnected && !profileData?.body.isOwner && (
-          <button className="mx-5 mt-2 mb-4 bg-[#0A66C2] text-white px-4 py-1 rounded-full">
+          <button
+            className="mx-5 mt-2 mb-4 bg-[#0A66C2] text-white px-4 py-1 rounded-full"
+            onClick={() => {
+              handleClickConnect();
+            }}
+          >
             Connect
           </button>
         )}
