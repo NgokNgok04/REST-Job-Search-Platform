@@ -43,7 +43,7 @@ export interface Feeds {
 
 export default function Feed() {
   const [posts, setPosts] = useState<Feeds[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -74,15 +74,21 @@ export default function Feed() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/feed?cursor=${cursor}&limit=10`,
+        `http://localhost:3000/api/feed?cursor=${nextCursor}&limit=10`,
         { withCredentials: true }
       );
 
-      const { posts: newPosts, nextCursor } = response.data.body;
+      const { posts: newPosts, cursor } = response.data.body;
 
-      setPosts((prev) => [...prev, ...newPosts]);
-      setCursor(nextCursor);
-      setHasMore(nextCursor !== null);
+      setPosts((prev) => {
+        const existingIds = new Set(prev.map((post) => post.post.id));
+        const filteredNewPosts = newPosts.filter(
+          (post: Feeds) => !existingIds.has(post.post.id)
+        );
+        return [...prev, ...filteredNewPosts];
+      });
+      setNextCursor(cursor);
+      setHasMore(cursor !== null);
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
@@ -105,7 +111,7 @@ export default function Feed() {
     return () => {
       if (observer.current) observer.current.disconnect();
     };
-  }, [cursor, hasMore]);
+  }, [nextCursor, hasMore]);
 
   const hasFetched = useRef(false);
   useEffect(() => {
@@ -136,7 +142,14 @@ export default function Feed() {
         content: newFeed.post.content,
       };
       sendNotificationFeed(pushNotif);
-      setPosts((prevPosts) => [newFeed, ...prevPosts]);
+
+      setPosts((prevPosts) => {
+        const existingIds = new Set(prevPosts.map((post) => post.post.id));
+        if (!existingIds.has(newFeed.post.id)) {
+          return [newFeed, ...prevPosts];
+        }
+        return prevPosts;
+      });
     } catch (error) {
       console.error("Failed to handle post creation:", error);
     }
