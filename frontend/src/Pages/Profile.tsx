@@ -128,9 +128,12 @@ export default function ProfilPage() {
           } gap-2 font-semibold`}
         >
           <h1 className="text-[20px]">{profileData?.body.username}</h1>
-          <h1 className="flex items-center text-[#0A66C2]">
+          <a
+            href={`/connections/${id}`}
+            className="flex items-center text-[#0A66C2]"
+          >
             {profileData?.body.connection_count} Connection
-          </h1>
+          </a>
         </div>
 
         {!profileData?.body.isConnected &&

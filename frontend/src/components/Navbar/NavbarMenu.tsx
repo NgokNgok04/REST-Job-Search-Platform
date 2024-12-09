@@ -13,7 +13,7 @@ export default function NavbarMenu() {
   const menuBeforeLogin = [
     {
       path: "/users",
-      name: "Profile",
+      name: "People",
       icon: <UserGroupIcon height={27} width={27} />,
     },
   ];

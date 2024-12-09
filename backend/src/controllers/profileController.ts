@@ -94,7 +94,7 @@ export const ProfileController = {
       const isConnected = await User.isConnected(req.user.id, req.params.id);
       data.isOwner = false;
       data.isConnected = isConnected;
-      responseAPI(res, 200, true, "Success get Profile Another People", data);
+      responseAPI(res, 200, true, "Success get Profile Another Peoples", data);
       return;
     } catch (err: unknown) {
       responseAPI(res, 500, false, "Internal Server Error", {});
