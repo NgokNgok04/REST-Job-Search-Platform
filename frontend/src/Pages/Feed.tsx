@@ -4,6 +4,10 @@ import PersonCard from "@/components/PersonCard";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import FeedCard from "@/components/Feed/FeedCard";
+import {
+  sendNotificationFeed,
+  PushFeedNotification,
+} from "@/utils/notifications";
 
 type userDataProps = {
   username: string;
@@ -114,7 +118,7 @@ export default function Feed() {
   const fetchPoster = async (newPost: Post) => {
     try {
       const user = await UserAPI.getSelf();
-      const apalah: Feeds = {
+      const newFeed: Feeds = {
         post: newPost,
         user: {
           id: user.id,
@@ -126,8 +130,13 @@ export default function Feed() {
         isOwner: true,
       };
 
-      console.log("Handle");
-      setPosts((prevPosts) => [apalah, ...prevPosts]);
+      const pushNotif: PushFeedNotification = {
+        name: newFeed.user.full_name,
+        user_id: newFeed.user.id,
+        content: newFeed.post.content,
+      };
+      sendNotificationFeed(pushNotif);
+      setPosts((prevPosts) => [newFeed, ...prevPosts]);
     } catch (error) {
       console.error("Failed to handle post creation:", error);
     }

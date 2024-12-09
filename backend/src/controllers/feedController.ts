@@ -81,7 +81,7 @@ export const FeedController = {
             user: serializeUser(post.User),
             isOwner: BigInt(userId) == post.user_id,
           })),
-          nextCursor: hasNextPage
+          cursor: hasNextPage
             ? posts[posts.length - 1].id.toString()
             : null,
         },

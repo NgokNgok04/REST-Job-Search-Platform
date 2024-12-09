@@ -90,7 +90,7 @@ export type PushFeedNotification = {
   user_id: string;
   content: string;
 };
-export async function sendNotificationChat(payload: PushChatNotification) {
+export async function sendNotificationChat(payload: PushFeedNotification) {
   try {
     const response = await client.post("/sendChat", payload);
     console.log("Notification sent successfully", response.data);
