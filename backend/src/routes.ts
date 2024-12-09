@@ -905,7 +905,7 @@ export const defineRoutes = (app: Express) => {
    *                   example: false
    *                 message:
    *                   type: string
-   *                   example: "Invalid post" or "You are not authorized to see this feed"
+   *                   example: "You are not authorized to see this feed"
    *       401:
    *         description: Unauthorized error due to missing or invalid user authentication.
    *         content:
