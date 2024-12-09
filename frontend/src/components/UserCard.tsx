@@ -17,7 +17,8 @@ interface UserCardProps {
 
 const UserCard: React.FC<UserCardProps> = ({ user, isLoggedIn, onAction }) => {
   return (
-    <li
+    <a
+      href={`/profil/${user.id}`}
       style={{
         padding: "10px",
         borderBottom: "1px solid #ccc",
@@ -31,7 +32,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, isLoggedIn, onAction }) => {
           <AvatarImage
             src={user.profile_photo_path || "/profile.png"}
             alt={user.username}
-            style={{ width: "40px", height: "40px", objectFit: "cover" }} 
+            style={{ width: "40px", height: "40px", objectFit: "cover" }}
           />
           <AvatarFallback>
             {user.username.charAt(0).toUpperCase() || "B"}
@@ -50,7 +51,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, isLoggedIn, onAction }) => {
           {user.isConnected ? "Unconnect" : "Send Request"}
         </Button>
       )}
-    </li>
+    </a>
   );
 };
 
