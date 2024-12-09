@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-import { Post } from "@/Pages/Feeds";
+import { Post } from "@/Pages/Feed";
 
 interface EditPostProps {
   postId: string;
@@ -39,7 +39,7 @@ const EditPost: React.FC<EditPostProps> = ({ postId, onClose }) => {
         { withCredentials: true }
       );
       const updatedPost = response.data.body;
-      onClose(updatedPost); 
+      onClose(updatedPost);
     } catch (error: any) {
       console.error("Failed to update post", error);
     } finally {

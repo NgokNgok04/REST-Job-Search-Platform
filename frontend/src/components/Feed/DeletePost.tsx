@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 
 interface DeletePostProps {
   postId: string;
-  onClose: () => void;
+  onClose: (success: boolean) => void;
 }
 
 const DeletePost: React.FC<DeletePostProps> = ({ postId, onClose }) => {
@@ -16,7 +16,7 @@ const DeletePost: React.FC<DeletePostProps> = ({ postId, onClose }) => {
       await axios.delete(`http://localhost:3000/api/feed/${postId}`, {
         withCredentials: true,
       });
-      onClose(); 
+      onClose(true);
     } catch (error: any) {
       console.error("Failed to delete post", error);
     } finally {

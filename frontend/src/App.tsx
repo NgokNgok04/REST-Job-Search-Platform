@@ -16,12 +16,12 @@ import ConnectionsList from "./Pages/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
-import FeedPage from "./Pages/Feeds";
+import FeedPage from "./Pages/Feed";
 import Chat from "./components/Chat";
 import Broh from "./components/Broh";
 import { getCookie } from "./utils/cookieHandler";
 import ChatRooms from "./components/ChatRooms";
-import Feed from "./Pages/FeedTest";
+import Feed from "./Pages/Feed";
 // import client from "./utils/axiosClient";
 
 function App() {
