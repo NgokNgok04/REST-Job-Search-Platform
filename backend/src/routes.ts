@@ -10,6 +10,7 @@ import { FeedController } from "./controllers/feedController";
 import { Request, Response } from "express";
 import { notifController } from "./controllers/notifController";
 import path from "path";
+import upload from "./middleware/uploadImage";
 export const defineRoutes = (app: Express) => {
   /**
    * @swagger
@@ -274,7 +275,11 @@ export const defineRoutes = (app: Express) => {
    */
   app.get("/api/profil/self", ProfileController.getSelf);
   app.get("/api/profil/:id", ProfileController.getProfile);
-  app.put("/api/profil/:id", ProfileController.setProfile);
+  app.put(
+    "/api/profil/:id",
+    upload.single("profile_photo_path"),
+    ProfileController.setProfile
+  );
 
   /**
    * CHAT ROUTES

@@ -105,31 +105,39 @@ export const ProfileController = {
       const { username, full_name, profile_photo_path, work_history, skills } =
         req.body;
       const file = req.file;
-
       if (username == "") {
         responseAPI(res, 200, true, "Username cant be empty");
         return;
       }
-
+      let path: string | null = "";
+      if (profile_photo_path && profile_photo_path == "undefined") {
+        path = null;
+      } else {
+        path = profile_photo_path;
+      }
       const profileData = {
         username: username,
         full_name: full_name,
         work_history: work_history,
-        profile_photo_path: profile_photo_path,
+        profile_photo_path: path,
         skills: skills,
       } as {
         username: string;
         full_name: string;
         work_history: string;
         skills: string;
-        profile_photo_path: string;
+        profile_photo_path: string | null;
       };
       if (file) {
-        profileData.profile_photo_path = `/store/${req.file.filename}`;
+        if (req.file.filename === "undefined") {
+          profileData.profile_photo_path = "/store/profile.png";
+        } else {
+          profileData.profile_photo_path = `/store/${req.file.filename}`;
+        }
       }
 
       User.setUser(req.params.id, profileData);
-      responseAPI(res, 200, true, "Profile updated successfuly");
+      responseAPI(res, 200, true, "Profile updated successfuly", profileData);
       return;
     } catch (err) {
       responseAPI(res, 500, false, "Internal Server Error");

@@ -105,9 +105,9 @@ export default function EditProfile({ fullName, username }: EditProfileProps) {
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your new username" {...field} />
+                    <Input placeholder="Enter your new full name" {...field} />
                   </FormControl>
                 </FormItem>
               )}

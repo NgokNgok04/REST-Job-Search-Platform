@@ -7,22 +7,24 @@ type AuthContext = {
   idUser: number;
   username: string;
   name: string;
-  profile_photo: string | null;
+  profile_photo: string;
   update: boolean;
   setUpdate: React.Dispatch<React.SetStateAction<boolean>>;
   login: (payload: LoginProps) => Promise<APIResponse>;
   logout: () => Promise<APIResponse>;
+  updateProfile: (path: string) => void;
 };
 const AuthContext = createContext<AuthContext>({
   isLogin: false,
   idUser: 0,
   username: "Anonim",
   name: "Anonim",
-  profile_photo: "",
+  profile_photo: "/store/profile.png",
   update: false,
   setUpdate: () => {},
   login: UserAPI.login,
   logout: UserAPI.logout,
+  updateProfile: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -31,18 +33,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [idUser, setIdUser] = useState(0);
   const [username, setUsername] = useState("Anonim");
   const [name, setName] = useState("Anonim");
-  const [profile_photo, setProfile] = useState("");
+  const [profile_photo, setProfile] = useState("/store/profile.png");
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const user = await UserAPI.getSelf();
         if (user.username) {
+          console.log("KEPANGGIL");
           setIsLogin(true);
           setUsername(user.username);
           setIdUser(Number(user.id));
           setName(user.name ?? "");
-          setProfile(user.profile_photo ?? "");
+          setProfile(user.profile_photo);
         }
       } catch (error) {
         console.log(error);
@@ -51,6 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     fetchUser();
   }, [update]);
+
+  async function updateProfile(path: string) {
+    setProfile(path);
+  }
 
   async function login(payload: LoginProps) {
     const response = await UserAPI.login(payload);
@@ -77,6 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUpdate,
         login,
         logout,
+        updateProfile,
       }}
     >
       {children}
