@@ -11,7 +11,7 @@ import RegisterPage from "./Pages/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
 import UsersList from "./Pages/UsersList";
-import ConnectionRequests from "./components/ConnectionRequest";
+import ConnectionRequests from "./Pages/ConnectionRequest";
 import ConnectionsList from "./Pages/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";

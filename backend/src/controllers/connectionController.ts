@@ -116,11 +116,48 @@ export const ConnectionController = {
       const requests = await prisma.connectionRequest.findMany({
         where: { to_id: loggedUser },
         orderBy: { created_at: "desc" },
+        include: {
+          From: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              full_name: true,
+              profile_photo_path: true,
+            },
+          },
+        },
       });
 
-      res.status(200).json(serializeConnectionAndRequest(requests));
+      const serializedRequests = requests.map((request) => ({
+        request: {
+          from_id: request.from_id.toString(),
+          to_id: request.to_id.toString(),
+          created_at: request.created_at,
+        },
+        user: {
+          id: request.From.id.toString(),
+          username: request.From.username,
+          email: request.From.email,
+          full_name: request.From.full_name || "N/A",
+          profile_photo_path: request.From.profile_photo_path || null,
+        },
+      }));
+
+      res.status(200).json({
+        success: true,
+        message: "Connection requests fetched successfully",
+        body: serializedRequests,
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch connection requests." });
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch connection requests",
+        error:
+          error instanceof Error
+            ? { code: "SERVER_ERROR", details: error.message }
+            : null,
+      });
     }
   },
 
@@ -307,7 +344,7 @@ export const ConnectionController = {
       });
 
       const isLogin = !!req.cookies.authToken;
-      let loggedInUserIdBigInt : bigint | undefined;
+      let loggedInUserIdBigInt: bigint | undefined;
       if (isLogin) {
         const decoded = jwt.verify(
           req.cookies.authToken,
