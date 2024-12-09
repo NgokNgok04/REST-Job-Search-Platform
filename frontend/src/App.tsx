@@ -10,9 +10,9 @@ import LoginPage from "./Pages/LoginPage";
 import RegisterPage from "./Pages/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
-import UsersList from "./components/UsersList";
+import UsersList from "./Pages/UsersList";
 import ConnectionRequests from "./components/ConnectionRequest";
-import ConnectionsList from "./components/Connection";
+import ConnectionsList from "./Pages/Connection";
 import ProfilPage from "./Pages/Profile";
 import WorkHistory from "./components/Profile/WorkHistory";
 import Skills from "./components/Profile/Skills";
@@ -65,6 +65,32 @@ function App() {
             </Layout>
           }
         />
+        <Route
+          path="/requests"
+          element={
+            <Layout>
+              <ConnectionRequests />
+            </Layout>
+          }
+        />
+        <Route
+          path="/connections/:userId"
+          element={
+            <Layout>
+              <ConnectionsList />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <Layout>
+              <UsersList />
+            </Layout>
+          }
+        />
+
         <Route
           path="/requests"
           element={

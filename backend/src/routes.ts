@@ -48,7 +48,8 @@ export const defineRoutes = (app: Express) => {
     res.json({ test: ["berto", "matthew", "indra", "hs"] });
   });
 
-  app.get("/api/users", AuthMiddleware.authorization, UserController.getUsers);
+  // User routes
+  app.get("/api/users", UserController.getUsers);
   app.get(
     "/api/logged-id,",
     AuthMiddleware.authorization,
@@ -70,11 +71,7 @@ export const defineRoutes = (app: Express) => {
     AuthMiddleware.authorization,
     ConnectionController.respondToRequest
   );
-  app.get(
-    "/api/connections/:userId",
-    AuthMiddleware.authorization,
-    ConnectionController.getConnections
-  );
+  app.get("/api/connections/:userId", ConnectionController.getConnections);
   app.delete(
     "/api/connections/unconnect",
     AuthMiddleware.authorization,
@@ -83,6 +80,11 @@ export const defineRoutes = (app: Express) => {
 
   // Feed routes
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
+  app.get(
+    "/api/feed/:post_id",
+    AuthMiddleware.authorization,
+    FeedController.getPostById
+  );
   app.get(
     "/api/feed/:post_id",
     AuthMiddleware.authorization,
