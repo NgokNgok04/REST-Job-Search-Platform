@@ -51,6 +51,10 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 const server = app.listen(3000, () => {
   console.log("Server listening on port 3000...");

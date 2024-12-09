@@ -814,7 +814,7 @@ export const defineRoutes = (app: Express) => {
  *                 message:
  *                   type: string
  *                   example: Unauthorized: User not logged in
-       500:
+ *      500:
  *         description: Internal server error while fetching the feed.
  *         content:
  *           application/json:
@@ -2198,4 +2198,5 @@ export const defineRoutes = (app: Express) => {
   app.post("/api/sendFeed", notifController.sendFeed);
 
   app.use("/store", express.static(path.join(__dirname, "../store")));
+
 };
