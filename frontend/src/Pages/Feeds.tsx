@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import CreatePost from "@/components/Feed/CreatePost";
 import EditPost from "@/components/Feed/UpdatePost";
 import DeletePost from "@/components/Feed/DeletePost";
+import { UserAPI } from "@/api/user-api";
 
 export interface Post {
   id: string;
@@ -21,8 +22,25 @@ export interface Post {
   updated_at: string;
 }
 
+export interface Feeds {
+  post: {
+    id: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+  };
+  user: {
+    id: string;
+    username: string;
+    email: string;
+    full_name: string;
+    profile_photo_path: string;
+  };
+  isOwner: boolean;
+}
+
 const FeedPage: React.FC = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Feeds[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -79,31 +97,55 @@ const FeedPage: React.FC = () => {
     }
   }, []);
 
+  const fetchPoster = async (newPost: Post) => {
+    try {
+      const user = await UserAPI.getSelf();
+      const apalah: Feeds = {
+        post: newPost,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          full_name: user.full_name || "",
+          profile_photo_path: user.profile_photo_path,
+        },
+        isOwner: true,
+      };
+
+      console.log("Handle");
+      setCreateOpen(false);
+      setPosts((prevPosts) => [apalah, ...prevPosts]);
+    } catch (error) {
+      console.error("Failed to handle post creation:", error);
+    }
+  };
+
   const handleCreatePostSuccess = (newPost: Post) => {
-    console.log("Handle");
-    setCreateOpen(false);
-    setPosts((prevPosts) => [newPost, ...prevPosts]); // Tambahkan post baru di awal
+    fetchPoster(newPost);
   };
 
   const handleUpdatePostSuccess = (updatedPost: Post) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
-        post.id === updatedPost.id
+        post.post.id === updatedPost.id
           ? {
               ...post,
-              content: updatedPost.content,
-              updated_at: updatedPost.updated_at,
+              post: {
+                ...post.post,
+                content: updatedPost.content,
+                updated_at: updatedPost.updated_at,
+              },
             }
           : post
       )
     );
-    setEditPostId(null); 
+    setEditPostId(null);
   };
 
   const handleDeletePostSuccess = () => {
     setDeletePostId(null);
     setPosts(
-      (prevPosts) => prevPosts.filter((post) => post.id !== deletePostId) // Hapus post berdasarkan id
+      (prevPosts) => prevPosts.filter((post) => post.post.id !== deletePostId) // Hapus post berdasarkan id
     );
   };
 
@@ -116,20 +158,20 @@ const FeedPage: React.FC = () => {
       <div>
         {posts.map((post, index) => (
           <div
-            key={post.id}
+            key={post.post.id}
             ref={index === posts.length - 1 ? lastPostRef : null}
           >
-            <p>{post.content}</p>
+            <p>{post.post.content}</p>
             <div className="flex mt-2 space-x-2 post-actions">
               <Button
                 variant="secondary"
-                onClick={() => setEditPostId(post.id)}
+                onClick={() => setEditPostId(post.post.id)}
               >
                 Update
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => setDeletePostId(post.id)}
+                onClick={() => setDeletePostId(post.post.id)}
               >
                 Delete
               </Button>
