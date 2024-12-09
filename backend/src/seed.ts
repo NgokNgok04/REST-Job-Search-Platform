@@ -88,17 +88,17 @@ async function main() {
 
   // Generate Push Subscriptions
   // ini keknya salah
-  const pushSubscriptionData = users.map(user => ({
-    endpoint: customFaker.internet.url(),
-    user_id: user.id,
-    keys: JSON.stringify({
-      p256dh: customFaker.string.alphanumeric(43),
-      auth: customFaker.string.alphanumeric(22),
-    }),
-  }));
+  // const pushSubscriptionData = users.map(user => ({
+  //   endpoint: customFaker.internet.url(),
+  //   user_id: user.id,
+  //   keys: JSON.stringify({
+  //     p256dh: customFaker.string.alphanumeric(43),
+  //     auth: customFaker.string.alphanumeric(22),
+  //   }),
+  // }));
 
-  await prisma.pushSubscription.createMany({ data: pushSubscriptionData });
-  console.log(`${pushSubscriptionData.length} push subscription berhasil dibuat.`);
+  // await prisma.pushSubscription.createMany({ data: pushSubscriptionData });
+  // console.log(`${pushSubscriptionData.length} push subscription berhasil dibuat.`);
 }
 
 main()
