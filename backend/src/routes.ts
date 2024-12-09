@@ -50,35 +50,602 @@ export const defineRoutes = (app: Express) => {
 
   // User routes
   app.get("/api/users", UserController.getUsers);
+
+  /**
+   * @swagger
+   * api/logged-in-user:
+   *   get:
+   *     summary: Get the logged-in user's ID
+   *     description: Retrieve the ID of the currently logged-in user. Returns an error if no user is found.
+   *     tags:
+   *       - Users
+   *     responses:
+   *       200:
+   *         description: Successfully retrieved the logged-in user's ID.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "User is logged in"
+   *                 body:
+   *                   type: string
+   *                   example: "user123"
+   *       401:
+   *         description: Unauthorized access; no user is logged in.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: no user found"
+   *                 error:
+   *                   type: string
+   *                   nullable: true
+   *                   example: null
+  */
+
   app.get(
     "/api/logged-id,",
     AuthMiddleware.authorization,
     UserController.getLoggedInUser
   );
 
+  /**
+   * @swagger
+   * api/connection-request:
+   *   post:
+   *     summary: Send a connection request
+   *     description: Allows a logged-in user to send a connection request to another user.
+   *     tags:
+   *       - Connection
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               to_id:
+   *                 type: string
+   *                 description: The ID of the user to whom the connection request is being sent.
+   *                 example: "12345"
+   *     responses:
+   *       201:
+   *         description: Connection request sent successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Connection request sent successfully"
+   *                 error:
+   *                   type: string
+   *                   nullable: true
+   *                   example: null
+   *                 body:
+   *                   type: object
+   *                   description: Serialized connection request details.
+   *       400:
+   *         description: Bad request due to invalid input or duplicate connection request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Invalid or missing 'to_id' parameter"
+   *                 error:
+   *                   type: string
+   *                   nullable: true
+   *                   example: null
+   *       401:
+   *         description: Unauthorized; user is not logged in.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: Missing userId"
+   *                 error:
+   *                   type: string
+   *                   nullable: true
+   *                   example: null
+   *       500:
+   *         description: Server error while processing the request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to send connection request"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   properties:
+   *                     code:
+   *                       type: string
+   *                       example: "SERVER_ERROR"
+   *                     details:
+   *                       type: string
+   *                       example: "Error details here"
+  */
   app.post(
     "/api/connections/request",
     AuthMiddleware.authorization,
     ConnectionController.sendConnectionRequest
   );
+
+    /**
+     * @swagger
+     * api/connections/pending:
+     *   get:
+     *     summary: Get pending connection requests
+     *     description: Fetches all pending connection requests for the logged-in user, ordered by the most recent.
+     *     tags:
+     *       - Connection
+     *     responses:
+     *       200:
+     *         description: Successfully fetched pending connection requests.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: true
+     *                 message:
+     *                   type: string
+     *                   example: "Connection requests fetched successfully"
+     *                 body:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       request:
+     *                         type: object
+     *                         properties:
+     *                           from_id:
+     *                             type: string
+     *                             example: "12345"
+     *                           to_id:
+     *                             type: string
+     *                             example: "67890"
+     *                           created_at:
+     *                             type: string
+     *                             format: date-time
+     *                             example: "2024-12-08T12:34:56Z"
+     *                       user:
+     *                         type: object
+     *                         properties:
+     *                           id:
+     *                             type: string
+     *                             example: "12345"
+     *                           username:
+     *                             type: string
+     *                             example: "johndoe"
+     *                           email:
+     *                             type: string
+     *                             example: "johndoe@example.com"
+     *                           full_name:
+     *                             type: string
+     *                             example: "John Doe"
+     *                           profile_photo_path:
+     *                             type: string
+     *                             nullable: true
+     *                             example: "/uploads/profile/johndoe.jpg"
+     *       401:
+     *         description: Unauthorized; user is not logged in.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                   example: "Unauthorized: Missing userId"
+     *       500:
+     *         description: Internal server error while processing the request.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: false
+     *                 message:
+     *                   type: string
+     *                   example: "Failed to fetch connection requests"
+     *                 error:
+     *                   type: object
+     *                   nullable: true
+     *                   properties:
+     *                     code:
+     *                       type: string
+     *                       example: "SERVER_ERROR"
+     *                     details:
+     *                       type: string
+     *                       example: "Database connection failed"
+    */
   app.get(
     "/api/connections/requests",
     AuthMiddleware.authorization,
     ConnectionController.getPendingRequests
   );
+    
+    /**
+   * @swagger
+   * api/connections/respond:
+   *   post:
+   *     summary: Respond to a connection request
+   *     description: Allows the logged-in user to accept or reject a pending connection request.
+   *     tags:
+   *       - Connection
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               to_id:
+   *                 type: string
+   *                 description: The ID of the user who sent the connection request.
+   *                 example: "12345"
+   *               action:
+   *                 type: string
+   *                 description: The action to perform on the request. Allowed values: 'accept' or 'reject'.
+   *                 enum:
+   *                   - accept
+   *                   - reject
+   *                 example: "accept"
+   *     responses:
+   *       200:
+   *         description: Connection request processed successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Request processed successfully."
+   *                 body:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       400:
+   *         description: Bad request due to invalid or missing parameters.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Invalid 'action' parameter. Allowed values: 'accept' or 'reject'"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       401:
+   *         description: Unauthorized; user is not logged in.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: Missing userId"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       404:
+   *         description: Request not found.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Request not found."
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   * 
+   *      500:
+   *         description: Internal server error while processing the request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to process connection request."
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   properties:
+   *                     code:
+   *                       type: string
+   *                       example: "SERVER_ERROR"
+   *                     details:
+   *                       type: string
+   *                       example: "Database connection failed"
+   */
   app.post(
     "/api/connections/respond",
     AuthMiddleware.authorization,
     ConnectionController.respondToRequest
   );
+
+  
+  /**
+   * @swagger
+   * api/connections/{userId}:
+   *   get:
+   *     summary: Get user connections
+   *     description: Fetches the list of connections for a specified user. Optionally determines if the logged-in user is connected to each connection.
+   *     tags:
+   *       - Connection
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the user whose connections are being fetched.
+   *         example: "12345"
+   *     responses:
+   *       200:
+   *         description: Successfully fetched connections.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Connections fetched successfully"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     connections:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           id:
+   *                             type: string
+   *                             example: "67890"
+   *                           username:
+   *                             type: string
+   *                             example: "johndoe"
+   *                           full_name:
+   *                             type: string
+   *                             example: "John Doe"
+   *                           profile_photo_path:
+   *                             type: string
+   *                             nullable: true
+   *                             example: "/uploads/profile/johndoe.jpg"
+   *                           isConnected:
+   *                             type: boolean
+   *                             example: true
+   *                     isLogin:
+   *                       type: boolean
+   *                       description: Indicates if the current user is logged in.
+   *                       example: true
+   *       400:
+   *         description: Bad request due to invalid or missing parameters.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Invalid or missing 'userId' parameter"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       500:
+   *         description: Internal server error while processing the request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to fetch connections"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   properties:
+   *                     code:
+   *                       type: string
+   *                       example: "SERVER_ERROR"
+   *                     details:
+   *                       type: string
+   *                       example: "Database connection failed"
+   */
   app.get("/api/connections/:userId", ConnectionController.getConnections);
+
+
+  /**
+   * @swagger
+   * /connections/unconnect:
+   *   post:
+   *     summary: Unconnect two users
+   *     description: Removes the connection between two users. Both directions of the connection are deleted.
+   *     tags:
+   *       - Connection
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               to_id:
+   *                 type: string
+   *                 description: The ID of the user to unconnect from.
+   *                 example: "67890"
+   *     responses:
+   *       200:
+   *         description: Connection successfully removed.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: "Connection unconnected successfully."
+   *       400:
+   *         description: Bad request due to invalid or missing parameters.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Invalid or missing 'to_id' parameter"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       401:
+   *         description: Unauthorized error due to missing user authentication.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Unauthorized: Missing userId"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       404:
+   *         description: Not found error if no connection exists between the users.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Connection not found. You have to connect first to unconnect"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       500:
+   *         description: Internal server error while processing the request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Failed to unconnect connections"
+   *                 error:
+   *                   type: object
+   *                   nullable: true
+   *                   properties:
+   *                     code:
+   *                       type: string
+   *                       example: "SERVER_ERROR"
+   *                     details:
+   *                       type: string
+   *                       example: "Database operation failed"
+   */
   app.delete(
     "/api/connections/unconnect",
     AuthMiddleware.authorization,
     ConnectionController.unconnectConnection
   );
 
-  // Feed routes
+  // FEED ROUTES
+
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
   app.get(
     "/api/feed/:post_id",
@@ -716,12 +1283,175 @@ export const defineRoutes = (app: Express) => {
     ChatController.storeChat
   );
 
+  /**
+   * @swagger
+   * /api/listchat:
+   *   get:
+   *     summary: Get chat rooms for the logged-in user
+   *     description: Retrieves a list of chat rooms for the logged-in user, including the last message in each chat room.
+   *     tags:
+   *       - Chat
+   *     responses:
+   *       200:
+   *         description: Chat rooms retrieved successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Chat rooms retrieved"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     chatRooms:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           otherUserId:
+   *                             type: string
+   *                             description: The ID of the other user in the chat room.
+   *                             example: "12345"
+   *                           lastMessage:
+   *                             type: object
+   *                             properties:
+   *                               message:
+   *                                 type: string
+   *                                 description: The last message in the chat room.
+   *                                 example: "Hey, how are you?"
+   *                               from_id:
+   *                                 type: string
+   *                                 description: The ID of the user who sent the last message.
+   *                                 example: "12345"
+   *                               to_id:
+   *                                 type: string
+   *                                 description: The ID of the user who received the last message.
+   *                                 example: "67890"
+   *                               timestamp:
+   *                                 type: string
+   *                                 description: The timestamp of the last message.
+   *                                 example: "2024-12-09T15:30:00Z"
+   *       404:
+   *         description: No chat rooms found for the logged-in user.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "No chat rooms found"
+   *                 body:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *       500:
+   *         description: Internal server error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Internal Server Error"
+   *                 body:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   *     security:
+   *       - bearerAuth: []
+   */
   app.get(
     "/api/listchat",
     AuthMiddleware.authorization,
     ChatController.getChatRooms
   );
 
+  /**
+   * @swagger
+   * /api/chat/connection/{userId}:
+   *   get:
+   *     summary: Check if the logged-in user is connected to another user
+   *     description: Verifies if the logged-in user has a connection with the specified user.
+   *     tags:
+   *       - Chat
+   *     parameters:
+   *       - name: userId
+   *         in: path
+   *         required: true
+   *         description: The ID of the user to check connection with.
+   *         schema:
+   *           type: integer
+   *           example: 12345
+   *     responses:
+   *       200:
+   *         description: The users are connected.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "User connected"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     connected:
+   *                       type: boolean
+   *                       example: true
+   *       404:
+   *         description: The users are not connected.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "User not connected"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     connected:
+   *                       type: boolean
+   *                       example: false
+   *       500:
+   *         description: Internal server error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Internal Server Error"
+   *                 body:
+   *                   type: object
+   *                   nullable: true
+   *                   example: null
+   */
   app.get(
     "/api/chat/connection/:userId",
     AuthMiddleware.authorization,
