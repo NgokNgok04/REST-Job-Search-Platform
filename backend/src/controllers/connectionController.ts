@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
-import { serializeUsers } from "./userController";
 
 
 const serializeConnectionAndRequest = (connection: any | any[]) => {
@@ -52,6 +51,30 @@ export const ConnectionController = {
         return res.status(400).json({
           success: false,
           message: "Connection already exists",
+          error: null,
+        });
+      }
+
+      const alreadyRequesting = await prisma.connectionRequest.findFirst({
+        where: { from_id: loggedUser, to_id: BigInt(to_id) },
+      });
+
+      if (alreadyRequesting) {
+        return res.status(400).json({
+          success: false,
+          message: "You already send request to this user",
+          error: null,
+        });
+      }
+
+      const existingRequest = await prisma.connectionRequest.findFirst({
+        where: {from_id: BigInt(to_id), to_id: loggedUser,  },
+      });
+
+      if (existingRequest) {
+        return res.status(400).json({
+          success: false,
+          message: "This user waiting for your confirmation",
           error: null,
         });
       }

@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useToast } from "../components/hooks/use-toast";
+import UserCard from "@/components/UserCard";
 
 interface User {
   id: string;
@@ -10,6 +10,7 @@ interface User {
   email: string;
   full_name?: string | null;
   profile_photo_path?: string | null;
+  isConnected?: boolean;
 }
 
 const debounce = (func: Function, delay: number) => {
@@ -43,8 +44,13 @@ const UsersList: React.FC = () => {
 
   const fetchUsers = async (query: string = "") => {
     try {
-      const response = await axios.get("http://localhost:3000/api/users", {
+      const api = isLoggedIn
+        ? "http://localhost:3000/api/users-logged"
+        : "http://localhost:3000/api/users";
+
+      const response = await axios.get(api, {
         params: { search: query },
+        withCredentials: true,
       });
       setUsers(response.data.body || []);
     } catch (error: any) {
@@ -87,9 +93,39 @@ const UsersList: React.FC = () => {
     }
   };
 
+  const unconnectConnection = async (toId: string) => {
+    try {
+      await axios.delete("http://localhost:3000/api/connections/unconnect", {
+        data: { to_id: toId },
+        withCredentials: true,
+      });
+      toast.toast({
+        title: "Disconnected",
+        description: "You have successfully unconnected.",
+      });
+      fetchUsers();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to disconnect.";
+      toast.toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: errorMessage,
+      });
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [isLoggedIn]);
+
+  const handleAction = (userId: string, isConnected: boolean) => {
+    if (isConnected) {
+      unconnectConnection(userId);
+    } else {
+      sendConnectionRequest(userId);
+    }
+  };
 
   return (
     <div>
@@ -104,29 +140,12 @@ const UsersList: React.FC = () => {
       {users.length === 0 && <p>No users found.</p>}
       <ul style={{ listStyleType: "none", padding: 0 }}>
         {users.map((user) => (
-          <li
+          <UserCard
             key={user.id}
-            style={{
-              padding: "10px",
-              borderBottom: "1px solid #ccc",
-            }}
-          >
-            <p>
-              <strong>Username:</strong> {user.username}
-            </p>
-            <p>
-              <strong>Photo:</strong> {user.profile_photo_path || "N/A"}
-            </p>
-            <p>
-              <strong>Full Name:</strong> {user.full_name || "N/A"}
-            </p>
-            <Button
-              onClick={() => sendConnectionRequest(user.id)}
-              variant="default"
-            >
-              Send Request
-            </Button>
-          </li>
+            user={user}
+            isLoggedIn={!!isLoggedIn}
+            onAction={handleAction}
+          />
         ))}
       </ul>
     </div>

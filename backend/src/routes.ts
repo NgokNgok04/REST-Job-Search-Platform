@@ -7,7 +7,6 @@ import { UserController } from "./controllers/userController";
 import { ConnectionController } from "./controllers/connectionController";
 import { ChatController } from "./controllers/chatController";
 import { FeedController } from "./controllers/feedController";
-import { Request, Response } from "express";
 
 export const defineRoutes = (app: Express) => {
   app.get("/api", (req, res) => {
@@ -16,6 +15,7 @@ export const defineRoutes = (app: Express) => {
 
   // User routes
   app.get("/api/users", UserController.getUsers);
+  app.get("/api/users-logged", AuthMiddleware.authorization, UserController.getUsersLoggedIn);
   app.get(
     "/api/logged-id,",
     AuthMiddleware.authorization,
