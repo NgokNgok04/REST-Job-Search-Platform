@@ -3,18 +3,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!identifier || !password) {
       setError("All fields are required");
     }
     try {
       const response = await login({
-        email,
+        identifier,
         password,
       });
       if (!response.status) {
@@ -36,11 +36,11 @@ const LoginPage = () => {
           Sign In
         </h2>
         <input
-          type="email"
-          placeholder="mail@gmail.com"
+          type="text"
+          placeholder="username or email"
           className="p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0073b1] focus:border-[#0073b1]"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
         />
         <input
           type="password"

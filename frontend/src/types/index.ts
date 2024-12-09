@@ -1,5 +1,5 @@
 export type LoginProps = {
-  email: string;
+  identifier: string;
   password: string;
 };
 export type APIResponse = {
