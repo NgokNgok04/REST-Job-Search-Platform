@@ -331,24 +331,6 @@ const Chat = () => {
           </div>
         </>
       );
-    }
-
-    if (!isConnected) {
-      return (
-        <>
-          <div className="flex items-center justify-center h-screen bg-gray-100">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Cannot Start Chat
-              </h3>
-              <p className="text-gray-500 mt-2">
-                Recipient not yet connected. Please wait until the recipient
-                accepts your connection request.
-              </p>
-            </div>
-          </div>
-        </>
-      );
     } else if (recpUsername === username) {
       return (
         <>
@@ -360,6 +342,22 @@ const Chat = () => {
               <p className="text-gray-500 mt-2">
                 You cannot chat with yourself. Please select another user to
                 chat with.
+              </p>
+            </div>
+          </div>
+        </>
+      );
+    } else if (!isConnected) {
+      return (
+        <>
+          <div className="flex items-center justify-center h-screen bg-gray-100">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-700">
+                Cannot Start Chat
+              </h3>
+              <p className="text-gray-500 mt-2">
+                Recipient not yet connected. Please wait until the recipient
+                accepts your connection request.
               </p>
             </div>
           </div>

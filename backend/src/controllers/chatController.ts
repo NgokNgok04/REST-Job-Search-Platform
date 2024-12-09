@@ -47,7 +47,7 @@ export const ChatController = {
                 },
             };
         });
-        console.log(chatRooms);
+        (chatRooms);
         if (chatRooms.length > 0) {
             responseAPI(res, 200, true, "Chat rooms retrieved", { chatRooms });
         } else {
@@ -128,7 +128,6 @@ export const ChatController = {
 
   storeChat: async (req: Request, res: Response) => {
     const fromId = req.user.id;
-    console.log(fromId);
     const { to_id, message, timestamp } = req.body;
     const toId = Number(to_id);
     const chatData = await prisma.chat.create({

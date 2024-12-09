@@ -9,6 +9,7 @@ import ProfileDetail from "@/components/Profile/ProfileDetail";
 import EditProfile from "@/components/Profile/EditProfile";
 import EditPP from "@/components/Profile/EditPP";
 import { useAuth } from "@/contexts/authContext";
+import { useNavigate } from "react-router-dom";
 export type ProfileResponse = {
   status: boolean;
   message: string;
@@ -49,7 +50,9 @@ const dummyData = {
   },
 };
 
+
 export default function ProfilPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [reloadKey, setReloadKey] = useState(0);
   const { isLogin } = useAuth();
@@ -91,8 +94,8 @@ export default function ProfilPage() {
     // TO DO
   }
 
-  function handleClickMessage() {
-    // TO DO
+  function handleClickMessage(userId: string) {
+    navigate(`/chat/${userId}`);
   }
 
   if (!isUserFound) {
@@ -156,7 +159,9 @@ export default function ProfilPage() {
               <button
                 className="hover:bg-[#004182] hover:border-[#004182] mx-5 mt-2 mb-4 bg-[#0A66C2] text-white border-[#0A66C2] border-[2px] px-4 py-1 rounded-full"
                 onClick={() => {
-                  handleClickMessage();
+                  if(id){
+                    handleClickMessage(id);
+                  }
                 }}
               >
                 Message
