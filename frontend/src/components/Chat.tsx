@@ -140,6 +140,7 @@ const Chat = () => {
             timestamp: msg.timestamp,
             username: msg.from_id === userId ? username : recpUsername,
           }));
+          console.log(fetchedMessages);
           setMessages(fetchedMessages);
         } else {
           console.error("Failed to fetch messages:", data);

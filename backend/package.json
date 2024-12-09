@@ -5,13 +5,15 @@
   "type": "commonjs",
   "scripts": {
     "start": "tsc && node dist/index.js",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "seed": "tsx src/seed.ts"
   },
   "author": "WBD",
   "license": "ISC",
   "keywords": [],
   "description": "",
   "dependencies": {
+    "@faker-js/faker": "^9.3.0",
     "@prisma/client": "^5.22.0",
     "@types/cookie-parser": "^1.4.7",
     "@types/jwt-decode": "^3.1.0",
