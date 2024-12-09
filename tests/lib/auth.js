@@ -16,6 +16,7 @@ export function login(identifier, password) {
     console.log(body);
   }
 
+  console.log(body);
   check(body, {
     "there is a token is valid":
       body &&

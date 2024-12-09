@@ -16,9 +16,9 @@ export let options = {
 
 export default function () {
   const userId = Math.floor(Math.random() * 100) + 1;
-  const username = `user${userId}wbd`;
-  const password = `password${userId}`;
-  let token = login(username, password);
+  const identifier = `user${userId}wbd`;
+  const password = `Password${userId}_`;
+  let token = login(identifier, password);
 
   const res = get("/api/profile/" + userId, { token });
 

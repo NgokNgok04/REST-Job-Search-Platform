@@ -715,122 +715,114 @@ export const defineRoutes = (app: Express) => {
     ConnectionController.unconnectConnection
   );
 
-  // FEED ROUTES
   /**
- * @swagger
- * /api/feed:
- *   get:
- *     summary: Fetches the user's feed based on their connections.
- *     description: Retrieves a feed of posts for the user and their connections, with pagination support.
- *     tags:
- *       - Feed
- *     parameters:
- *       - in: query
- *         name: cursor
- *         description: The cursor for pagination (used for fetching the next set of posts).
- *         required: false
- *         schema:
- *           type: string
- *       - in: query
- *         name: limit
- *         description: The number of posts to fetch.
- *         required: false
- *         schema:
- *           type: integer
- *           default: 10
- *     responses:
- *       200:
- *         description: Successfully fetched feed.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Successfully fetch feed
- *                 body:
- *                   type: object
- *                   properties:
- *                     posts:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           post:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: string
- *                                 example: "123"
- *                               content:
- *                                 type: string
- *                                 example: "This is a sample post."
- *                               created_at:
- *                                 type: string
- *                                 format: date-time
- *                                 example: "2024-12-09T12:00:00Z"
- *                               updated_at:
- *                                 type: string
- *                                 format: date-time
- *                                 example: "2024-12-09T12:05:00Z"
- *                           user:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: string
- *                                 example: "user123"
- *                               username:
- *                                 type: string
- *                                 example: "johndoe"
- *                               email:
- *                                 type: string
- *                                 example: "john.doe@example.com"
- *                               full_name:
- *                                 type: string
- *                                 example: "John Doe"
- *                               profile_photo_path:
- *                                 type: string
- *                                 example: "/path/to/profile/photo.jpg"
- *                           isOwner:
- *                             type: boolean
- *                             example: false
- *                     nextCursor:
- *                       type: string
- *                       example: "124"
- *       401:
- *         description: Unauthorized: User not logged in or invalid token.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Unauthorized: User not logged in
- *      500:
- *         description: Internal server error while fetching the feed.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Failed to fetch feed
- *                 error:
- *                   type: string
- *                   example: "Database operation failed"
- */
+   * @swagger
+   * /api/feed:
+   *   get:
+   *     summary: Get User Feed
+   *     description: Retrieve a paginated list of feed posts for the authenticated user and their connections.
+   *     tags:
+   *       - Feed
+   *     parameters:
+   *       - name: cursor
+   *         in: query
+   *         description: Cursor for pagination. Use the `nextCursor` value from the previous response.
+   *         required: false
+   *         schema:
+   *           type: string
+   *       - name: limit
+   *         in: query
+   *         description: Number of feed posts to retrieve per page. Defaults to 10.
+   *         required: false
+   *         schema:
+   *           type: integer
+   *           default: 10
+   *       - name: Authorization
+   *         in: header
+   *         description: Bearer token for authentication.
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Successfully fetched feed posts.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                 message:
+   *                   type: string
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     posts:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           post:
+   *                             type: object
+   *                             properties:
+   *                               id:
+   *                                 type: string
+   *                               content:
+   *                                 type: string
+   *                               created_at:
+   *                                 type: string
+   *                                 format: date-time
+   *                               updated_at:
+   *                                 type: string
+   *                                 format: date-time
+   *                           user:
+   *                             type: object
+   *                             properties:
+   *                               id:
+   *                                 type: string
+   *                               username:
+   *                                 type: string
+   *                               email:
+   *                                 type: string
+   *                               full_name:
+   *                                 type: string
+   *                               profile_photo_path:
+   *                                 type: string
+   *                             required:
+   *                               - id
+   *                               - username
+   *                               - email
+   *                               - full_name
+   *                     nextCursor:
+   *                       type: string
+   *                       nullable: true
+   *       401:
+   *         description: Unauthorized - User not logged in.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                 message:
+   *                   type: string
+   *       500:
+   *         description: Internal Server Error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                 message:
+   *                   type: string
+   *                 error:
+   *                   type: string
+   */
+
   app.get("/api/feed", AuthMiddleware.authorization, FeedController.getFeed);
 
   /**
@@ -913,7 +905,7 @@ export const defineRoutes = (app: Express) => {
    *                   example: false
    *                 message:
    *                   type: string
-   *                   example: "Invalid post" or "You are not authorized to see this feed"
+   *                   example: "You are not authorized to see this feed"
    *       401:
    *         description: Unauthorized error due to missing or invalid user authentication.
    *         content:

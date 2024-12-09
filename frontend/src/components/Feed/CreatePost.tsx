@@ -23,10 +23,10 @@ const CreatePost: React.FC<CreatePostProps> = ({ onClose }) => {
         { content },
         { withCredentials: true }
       );
-
-      const newPost = response.data.body;
-      console.log(newPost);
-      onClose(newPost);
+      if (response.data.success){
+        const newPost = response.data.body;
+        onClose(newPost);
+      }
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Failed to create post.";

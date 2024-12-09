@@ -25,7 +25,7 @@ export default function CreateFeed({ path, onCreateSuccess }: CreateFeedProps) {
         <Card className="p-4 mb-4">
           <div className="flex gap-2">
             <Avatar className="w-12 h-12">
-              <AvatarImage src={path} />
+              <AvatarImage src={`${import.meta.env.VITE_API_URL}${path}`} />
               <AvatarFallback>Profile</AvatarFallback>
             </Avatar>
             <Button

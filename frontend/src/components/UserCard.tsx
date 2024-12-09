@@ -30,7 +30,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, isLoggedIn, onAction }) => {
       <div style={{ display: "flex", alignItems: "center" }}>
         <Avatar>
           <AvatarImage
-            src={user.profile_photo_path || "/profile.png"}
+            src={`${import.meta.env.VITE_API_URL}${user.profile_photo_path}`}
             alt={user.username}
             style={{ width: "40px", height: "40px", objectFit: "cover" }}
           />
