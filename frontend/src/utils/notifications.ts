@@ -84,9 +84,24 @@ export type PushChatNotification = {
   room_id: string;
   message: string;
 };
+
+export type PushFeedNotification = {
+  name: string;
+  user_id: string;
+  content: string;
+};
 export async function sendNotificationChat(payload: PushChatNotification) {
   try {
     const response = await client.post("/sendChat", payload);
+    console.log("Notification sent successfully", response.data);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+}
+
+export async function sendNotificationFeed(payload: PushFeedNotification) {
+  try {
+    const response = await client.post("/sendFeed", payload);
     console.log("Notification sent successfully", response.data);
   } catch (error) {
     console.error("Error sending notification:", error);

@@ -16,13 +16,13 @@ export default function NavbarMenu() {
       name: "Profile",
       icon: <UserGroupIcon height={27} width={27} />,
     },
+  ];
+  const menuAfterLogin = [
     {
       path: "/feeds",
       name: "Home",
       icon: <HomeIcon />,
     },
-  ];
-  const menuAfterLogin = [
     {
       path: `/connections/${idUser}`,
       name: "My Network",

@@ -272,11 +272,267 @@ export const defineRoutes = (app: Express) => {
     AuthController.getUserById
   );
 
+  /** PROFILE ROUTES
   /**
-   * PROFILE ROUTES
+   * @swagger
+   * /api/profil/self:
+   *   get:
+   *     summary: Retrieve the current user's profile data.
+   *     description: Fetches the profile information of the currently logged-in user.
+   *     tags:
+   *       - Profile
+   *     responses:
+   *       200:
+   *         description: Success response with user data.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Success get User Data"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     username:
+   *                       type: string
+   *                       example: "john_doe"
+   *                     id:
+   *                       type: string
+   *                       example: "12345"
+   *                     name:
+   *                       type: string
+   *                       example: "John Doe"
+   *                     profile_photo:
+   *                       type: string
+   *                       example: "https://example.com/photo.jpg"
+   *       401:
+   *         description: Unauthorized if user is not logged in.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "User are not login!"
+   *       500:
+   *         description: Internal server error.
    */
   app.get("/api/profil/self", ProfileController.getSelf);
+  /**
+   * @swagger
+   * /api/profil/{id}:
+   *   get:
+   *     summary: Retrieve a user's profile.
+   *     description: Fetches profile information for a specific user by their ID. If the requesting user is logged in, additional data (e.g., connections, posts) is provided.
+   *     tags:
+   *       - Profile
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: The ID of the user whose profile is being retrieved.
+   *         schema:
+   *           type: integer
+   *           example: 123
+   *     responses:
+   *       200:
+   *         description: Success response with user profile data.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Success get Profile Another People"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     username:
+   *                       type: string
+   *                       example: "johndoe"
+   *                     name:
+   *                       type: string
+   *                       example: "John Doe"
+   *                     work_history:
+   *                       type: string
+   *                       example: "Software Developer at XYZ Corp"
+   *                     skills:
+   *                       type: string
+   *                       example: "JavaScript, React, Node.js"
+   *                     isOwner:
+   *                       type: boolean
+   *                       example: false
+   *                     isConnected:
+   *                       type: boolean
+   *                       example: true
+   *                     connection_count:
+   *                       type: string
+   *                       example: "5"
+   *                     profile_photo:
+   *                       type: string
+   *                       example: "https://example.com/profile.jpg"
+   *                     relevant_posts:
+   *                       type: object
+   *                       additionalProperties: true
+   *                       example: {}
+   *       500:
+   *         description: Internal server error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Internal Server Error"
+   *       400:
+   *         description: Invalid ID provided.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Please enter valid id"
+   *       404:
+   *         description: User not found.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "User not found"
+   */
+
   app.get("/api/profil/:id", ProfileController.getProfile);
+  /**
+   * @swagger
+   * /api/profil/{id}:
+   *   put:
+   *     summary: Update a user's profile.
+   *     description: Allows updating of a user's profile, including username, full name, work history, skills, and profile photo.
+   *     tags:
+   *       - Profile
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: The ID of the user whose profile is being updated.
+   *         schema:
+   *           type: integer
+   *           example: 123
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               username:
+   *                 type: string
+   *                 description: The user's username.
+   *                 example: johndoe
+   *               full_name:
+   *                 type: string
+   *                 description: The user's full name.
+   *                 example: John Doe
+   *               work_history:
+   *                 type: string
+   *                 description: The user's work history.
+   *                 example: Software Developer at XYZ Corp
+   *               skills:
+   *                 type: string
+   *                 description: The user's skills.
+   *                 example: JavaScript, React, Node.js
+   *               profile_photo_path:
+   *                 type: string
+   *                 format: binary
+   *                 description: The user's profile photo file.
+   *     responses:
+   *       200:
+   *         description: Success response after updating the profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Profile updated successfully"
+   *                 body:
+   *                   type: object
+   *                   properties:
+   *                     username:
+   *                       type: string
+   *                       example: johndoe
+   *                     full_name:
+   *                       type: string
+   *                       example: John Doe
+   *                     work_history:
+   *                       type: string
+   *                       example: Software Developer at XYZ Corp
+   *                     skills:
+   *                       type: string
+   *                       example: JavaScript, React, Node.js
+   *                     profile_photo_path:
+   *                       type: string
+   *                       example: /store/profile.png
+   *       400:
+   *         description: Validation error, such as an empty username.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Username can't be empty"
+   *       500:
+   *         description: Internal server error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Internal Server Error"
+   */
+
   app.put(
     "/api/profil/:id",
     upload.single("profile_photo_path"),
@@ -472,8 +728,152 @@ export const defineRoutes = (app: Express) => {
     ChatController.isConnected
   );
 
+  /**
+   * @swagger
+   * /api/subscribe:
+   *   post:
+   *     summary: Subscribe a user for push notifications.
+   *     description: Saves or updates the push subscription for a user.
+   *     tags:
+   *       - Notifications
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               endpoint:
+   *                 type: string
+   *                 description: The subscription endpoint.
+   *                 example: "https://fcm.googleapis.com/fcm/send/abcd1234"
+   *               keys:
+   *                 type: object
+   *                 description: The cryptographic keys used for the subscription.
+   *                 properties:
+   *                   auth:
+   *                     type: string
+   *                     example: "auth_key"
+   *                   p256dh:
+   *                     type: string
+   *                     example: "p256dh_key"
+   *               user_id:
+   *                 type: integer
+   *                 description: The ID of the user subscribing.
+   *                 example: 123
+   *     responses:
+   *       200:
+   *         description: Subscription saved successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Subscription saved successfully!"
+   *       500:
+   *         description: Error saving the subscription.
+   */
   app.post("/api/subscribe", notifController.subscribe);
+  /**
+   * @swagger
+   * /api/sendChat:
+   *   post:
+   *     summary: Send a chat notification to a user.
+   *     description: Sends a push notification about a new chat message.
+   *     tags:
+   *       - Notifications
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 description: The sender's name.
+   *                 example: "Alice"
+   *               message:
+   *                 type: string
+   *                 description: The chat message content.
+   *                 example: "Hello, how are you?"
+   *               room_id:
+   *                 type: integer
+   *                 description: The ID of the chat room.
+   *                 example: 456
+   *               to_id:
+   *                 type: integer
+   *                 description: The ID of the recipient.
+   *                 example: 789
+   *     responses:
+   *       200:
+   *         description: Notification sent successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "MANTAP BOS"
+   *       500:
+   *         description: Error sending the notification.
+   */
+
   app.post("/api/sendChat", notifController.sendChat);
+  /**
+   * @swagger
+   * /api/sendFeed:
+   *   post:
+   *     summary: Send a feed notification to connected users.
+   *     description: Sends a push notification when a user posts a new feed.
+   *     tags:
+   *       - Notifications
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 description: The name of the user posting the feed.
+   *                 example: "Bob"
+   *               content:
+   *                 type: string
+   *                 description: The content of the feed post.
+   *                 example: "Check out my latest project!"
+   *               user_id:
+   *                 type: integer
+   *                 description: The ID of the user posting the feed.
+   *                 example: 123
+   *     responses:
+   *       200:
+   *         description: Feed notification sent successfully.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Notification Feed success"
+   *       500:
+   *         description: Error sending the notification.
+   */
+
   app.post("/api/sendFeed", notifController.sendFeed);
 
   app.use("/store", express.static(path.join(__dirname, "../store")));

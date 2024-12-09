@@ -28,7 +28,7 @@ class User {
     });
 
     return Posts.map((post) => ({
-      id: post.id,
+      id: post.id.toString(),
       content: post.content,
       created_at: post.created_at.toString(),
       updated_at: post.updated_at.toString(),

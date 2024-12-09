@@ -18,7 +18,8 @@ async function main() {
       ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Agile', 'Scrum', 'Kepemimpinan'],
       customFaker.number.int({ min: 1, max: 3 })
     ).join(', '),
-    profile_photo_path: customFaker.image.avatar(),
+    profile_photo_path: null,
+    // profile_photo_path: customFaker.image.avatar(),
   }));
 
   await prisma.user.createMany({ data: userData });
@@ -88,17 +89,17 @@ async function main() {
 
   // Generate Push Subscriptions
   // ini keknya salah
-  const pushSubscriptionData = users.map(user => ({
-    endpoint: customFaker.internet.url(),
-    user_id: user.id,
-    keys: JSON.stringify({
-      p256dh: customFaker.string.alphanumeric(43),
-      auth: customFaker.string.alphanumeric(22),
-    }),
-  }));
+  // const pushSubscriptionData = users.map(user => ({
+  //   endpoint: customFaker.internet.url(),
+  //   user_id: user.id,
+  //   keys: JSON.stringify({
+  //     p256dh: customFaker.string.alphanumeric(43),
+  //     auth: customFaker.string.alphanumeric(22),
+  //   }),
+  // }));
 
-  await prisma.pushSubscription.createMany({ data: pushSubscriptionData });
-  console.log(`${pushSubscriptionData.length} push subscription berhasil dibuat.`);
+  // await prisma.pushSubscription.createMany({ data: pushSubscriptionData });
+  // console.log(`${pushSubscriptionData.length} push subscription berhasil dibuat.`);
 }
 
 main()

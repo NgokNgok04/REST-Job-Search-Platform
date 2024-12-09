@@ -10,6 +10,13 @@ import EditProfile from "@/components/Profile/EditProfile";
 import EditPP from "@/components/Profile/EditPP";
 import { useAuth } from "@/contexts/authContext";
 import { useNavigate } from "react-router-dom";
+
+export type Relevant_Post = {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+};
 export type ProfileResponse = {
   status: boolean;
   message: string;
@@ -22,13 +29,7 @@ export type ProfileResponse = {
     isConnected: boolean;
     connection_count: string;
     profile_photo: string;
-    relevant_posts: {
-      id: number;
-      content: string;
-      created_at: string;
-      updated_at: string;
-      user_id: number;
-    };
+    relevant_posts: Relevant_Post[];
   };
 };
 
@@ -41,15 +42,8 @@ const dummyData = {
   isConnected: false,
   connection_count: "0",
   profile_photo: profil,
-  relevant_posts: {
-    id: 0,
-    content: "",
-    created_at: Date(),
-    updated_at: Date(),
-    user_id: 0,
-  },
+  relevant_posts: [],
 };
-
 
 export default function ProfilPage() {
   const navigate = useNavigate();
@@ -159,7 +153,7 @@ export default function ProfilPage() {
               <button
                 className="hover:bg-[#004182] hover:border-[#004182] mx-5 mt-2 mb-4 bg-[#0A66C2] text-white border-[#0A66C2] border-[2px] px-4 py-1 rounded-full"
                 onClick={() => {
-                  if(id){
+                  if (id) {
                     handleClickMessage(id);
                   }
                 }}
@@ -187,8 +181,10 @@ export default function ProfilPage() {
         isOwner={profileData?.body.isOwner}
         skills={profileData?.body.skills}
       />
+      {/* {} */}
       <ProfileDetail
         section="Latest Posts"
+        posts={profileData?.body.relevant_posts}
         isOwner={profileData?.body.isOwner}
       />
     </div>
