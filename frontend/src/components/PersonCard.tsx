@@ -23,7 +23,7 @@ PersonCardProps) {
             alt="Background Image"
           />
           <Avatar className="translate-y-[-50%] h-20 w-20 mx-auto">
-            <AvatarImage src={path} />
+            <AvatarImage src={`${import.meta.env.VITE_API_URL}${path}`} />
             <AvatarFallback>Profile</AvatarFallback>
           </Avatar>
           <h1 className="text-center translate-y-[-35px] font-semibold">

@@ -116,7 +116,9 @@ export default function ConnectionRequests() {
           >
             <Avatar className="flex-shrink-0 w-16 h-16">
               <AvatarImage
-                src={request.user.profile_photo_path || "/profile.png"}
+                src={`${import.meta.env.VITE_API_URL}${
+                  request.user.profile_photo_path
+                }`}
                 alt={request.user.full_name || "no full name"}
               />
               <AvatarFallback>

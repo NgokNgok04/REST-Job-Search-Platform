@@ -62,7 +62,7 @@ export default function FeedCard({
       <div className="flex justify-between gap-2">
         <div className="flex flex-row gap-2">
           <Avatar className="w-12 h-12">
-            <AvatarImage src={path} />
+            <AvatarImage src={`${import.meta.env.VITE_API_URL}${path}`} />
             <AvatarFallback>Profile</AvatarFallback>
           </Avatar>
           <div>
