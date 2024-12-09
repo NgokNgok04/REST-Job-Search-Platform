@@ -82,10 +82,10 @@ export const ProfileController = {
       req.user = decoded;
 
       const posts = await User.getPosts(req.params.id);
+      data.relevant_posts = posts;
       if (req.user.id == req.params.id) {
         //Owner
         data.isOwner = true;
-        data.relevant_posts = posts;
         responseAPI(res, 200, true, "Success get Profile Owner", data);
         return;
       }

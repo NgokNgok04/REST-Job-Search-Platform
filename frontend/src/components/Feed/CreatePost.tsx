@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-import { Post } from "@/Pages/Feeds";
+import { Post } from "@/Pages/Feed";
 
 interface CreatePostProps {
   onClose: (newPost?: Post) => void;
@@ -27,7 +27,6 @@ const CreatePost: React.FC<CreatePostProps> = ({ onClose }) => {
       const newPost = response.data.body;
       console.log(newPost);
       onClose(newPost);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message || "Failed to create post.";

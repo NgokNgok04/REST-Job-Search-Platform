@@ -56,7 +56,7 @@ const RegisterPage = () => {
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-full max-w-md">
+      <div className="flex flex-col w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-3xl font-semibold text-[#0073b1] mb-6 text-center">
           Register
         </h2>
@@ -111,7 +111,7 @@ const RegisterPage = () => {
         >
           Register
         </button>
-        {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
+        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">Already have an account?</p>
           <a

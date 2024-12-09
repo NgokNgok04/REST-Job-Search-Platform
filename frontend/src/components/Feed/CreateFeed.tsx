@@ -10,33 +10,27 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import CreatePost from "./CreatePost";
-import { Post } from "@/Pages/Feeds";
+import { Post } from "@/Pages/Feed";
 interface CreateFeedProps {
   path: string;
+  onCreateSuccess: (newPost: Post) => void;
 }
-export default function CreateFeed({ path }: CreateFeedProps) {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isCreateOpen, setCreateOpen] = useState(false);
 
-  const handleCreatePostSuccess = (newPost: Post) => {
-    console.log("Handle");
-    setCreateOpen(false);
-    setPosts((prevPosts) => [newPost, ...prevPosts]); // Tambahkan post baru di awal
-  };
-  console.log(posts);
+export default function CreateFeed({ path, onCreateSuccess }: CreateFeedProps) {
+  const [isCreateOpen, setCreateOpen] = useState(false);
 
   return (
     <Dialog open={isCreateOpen} onOpenChange={setCreateOpen}>
       <DialogTrigger asChild>
         <Card className="p-4 mb-4">
           <div className="flex gap-2">
-            <Avatar className="h-12 w-12">
+            <Avatar className="w-12 h-12">
               <AvatarImage src={path} />
               <AvatarFallback>Profile</AvatarFallback>
             </Avatar>
             <Button
               variant="outline"
-              className="w-full justify-start text-gray-500"
+              className="justify-start w-full text-gray-500"
             >
               Start a post
             </Button>
@@ -50,7 +44,8 @@ export default function CreateFeed({ path }: CreateFeedProps) {
         <CreatePost
           onClose={(newPost) => {
             if (newPost) {
-              handleCreatePostSuccess(newPost);
+              onCreateSuccess(newPost); // Panggil fungsi dari parent
+              setCreateOpen(false);
             }
           }}
         />

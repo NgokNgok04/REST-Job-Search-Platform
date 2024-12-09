@@ -39,6 +39,7 @@ export const UserController = {
           full_name: true,
           profile_photo_path: true,
         },
+        take: 20,
       });
 
       const isLogin = !!req.cookies.authToken;
