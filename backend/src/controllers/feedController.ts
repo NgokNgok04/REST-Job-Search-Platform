@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma";
-import { error } from "console";
+import { serializeUser } from "./userController";
 
 const serializePost = (post: any) => {
   return {
@@ -49,6 +49,17 @@ export const FeedController = {
           skip: 1,
           cursor: { id: cursorId },
         }),
+        include: {
+          User: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              full_name: true,
+              profile_photo_path: true,
+            },
+          },
+        },
       });
 
       const hasNextPage = posts.length > take;
@@ -60,7 +71,16 @@ export const FeedController = {
         success: true,
         message: "Successfully fetch feed",
         body: {
-          posts: posts.map((post) => serializePost(post)),
+          posts: posts.map((post) => ({
+            post: {
+              id: post.id.toString(),
+              content: post.content,
+              created_at: post.created_at.toISOString(),
+              updated_at: post.updated_at.toISOString(),
+            },
+            user: serializeUser(post.User),
+            isOwner: BigInt(userId) == post.user_id,
+          })),
           nextCursor: hasNextPage
             ? posts[posts.length - 1].id.toString()
             : null,

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../prisma";
 import jwt from "jsonwebtoken";
 
-const serializeUser = (user: any) => {
+export const serializeUser = (user: any) => {
   return {
     ...user,
     id: user.id.toString(),

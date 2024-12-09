@@ -34,7 +34,6 @@ export default function ConnectionRequests() {
         { withCredentials: true }
       );
 
-      // Correctly extract the array from 'body'
       const requests = response.data.body;
       if (Array.isArray(requests)) {
         setRequests(requests);
