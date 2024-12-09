@@ -29,7 +29,7 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?schema=public
     depends_on:
       - db
-    command: ["npx", "prisma", "migrate", "dev"]
+    command: /bin/sh -c "npx prisma migrate dev && npm run seed"
     networks:
       - app-network
 
@@ -59,6 +59,7 @@ services:
       - "5432:5432"
     networks:
       - app-network
+
   redis:
     image: redis:latest
     container_name: redis_container
